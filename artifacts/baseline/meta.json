@@ -1,0 +1,13 @@
+{
+  "run_name": "baseline",
+  "stage": "Baseline",
+  "git": "38ce8883dea9f87c27a8a95f134e54fe8b673064",
+  "command": "uv run --project solution mib-solution data/train artifacts/baseline/predictions.jsonl && python3 scripts/evaluate.py --truth data/train_labels.csv --submission artifacts/baseline/predictions.jsonl --output-json artifacts/baseline/eval.json",
+  "slice": "train_full_1000",
+  "primary": 98.88225155555546,
+  "extraction": 37.385555555555555,
+  "classification": 49.669999999999995,
+  "calibration": 11.826695999999908,
+  "catastrophic_false_approvals": 0,
+  "timestamp": "2026-07-30T18:59:01.623331+00:00"
+}

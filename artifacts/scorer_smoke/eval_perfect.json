@@ -1,0 +1,46 @@
+{
+  "confusion": {
+    "APPROVED->APPROVED": 1,
+    "NEEDS_REVIEW->NEEDS_REVIEW": 1
+  },
+  "counts": {
+    "blank_case_rows": 0,
+    "duplicate_case_ids": 0,
+    "extra_cases": 0,
+    "invalid_adjudication_records": 0,
+    "invalid_confidence_records": 0,
+    "invalid_fee_status_records": 0,
+    "missing_cases": 0,
+    "scored_predictions": 2,
+    "submitted_records": 2,
+    "truth_cases": 2
+  },
+  "examples": {
+    "duplicate_case_ids": [],
+    "extra_case_ids": [],
+    "missing_case_ids": []
+  },
+  "raw": {
+    "catastrophic_false_approvals": 0,
+    "classification_max_raw": 16.0,
+    "classification_raw": 16.0,
+    "extraction_max_raw": 90.0,
+    "extraction_raw": 90.0,
+    "mean_confidence_brier": 0.05849999999999998
+  },
+  "score_scale": {
+    "calibration_points": 20.0,
+    "classification_points": 80.0,
+    "extraction_points": 50.0,
+    "max_score": 150.0,
+    "missing_penalty_cap": 10.0
+  },
+  "score_version": "mib_weighted_v1",
+  "scores": {
+    "calibration_score": 17.66,
+    "classification_score": 80.0,
+    "extraction_score": 50.0,
+    "missing_penalty": 0.0,
+    "total_score": 147.66
+  }
+}

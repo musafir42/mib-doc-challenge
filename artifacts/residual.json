@@ -1,0 +1,11 @@
+{
+  "case_ids": [
+    "MIB-000001",
+    "MIB-000002",
+    "MIB-000003",
+    "MIB-000004",
+    "MIB-000005"
+  ],
+  "notes": "PROCESS DRILL dummy residual — not a real hard-failure freeze. Replace during Segment.",
+  "version": "drill-0"
+}
