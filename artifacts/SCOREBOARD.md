@@ -12,3 +12,7 @@ Merge owner appends only. Residual row before full-data row for the same change 
 | 2026-07-30 | exp-risk | Explore | residual_seg-v1 | 71.60 | 0 | registry/risk signals; residual A/B | artifacts/exp-risk/ | 283876d |
 | 2026-07-30 | promote_seg1 | Integrate | residual_seg-v1 | 75.37 | 0 | merged extract+adjudicate; no auto-APPROVED; residual+full | artifacts/promote_seg1/ | 283876d |
 | 2026-07-30 | promote_seg1_full | Integrate | train_full | 106.95 | 0 | after residual promote; Finding APPROVED only for approve | artifacts/promote_seg1/train_eval.json | 283876d |
+| 2026-07-30 | modal_residual_text | Explore | residual_seg-v1 | 75.37 | 0 | Modal Volume mib-data; text map = promote_seg1 | artifacts/modal_residual_text/ | modal |
+| 2026-07-30 | modal_residual_ocr | Explore | residual_seg-v1 | 98.05 | 0 | Modal OCR map +22.7 vs text; tesseract+poppler | artifacts/modal_residual_ocr/ | modal |
+| 2026-07-30 | modal_full_ocr | Integrate | train_full | 114.20 | 0 | after residual OCR promote; full train Modal OCR | artifacts/modal_full_ocr/ | modal |
+| 2026-07-30 | promote_ocr | Integrate | residual_seg-v1 | 98.05 | 0 | promote OCR pipeline into solution/ | artifacts/modal_residual_ocr/ | pending |

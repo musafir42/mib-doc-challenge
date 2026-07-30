@@ -1,0 +1,12 @@
+{
+  "ok": true,
+  "case_id": "MIB-000033",
+  "ocr_available": true,
+  "text_layer_len": 844,
+  "ocr_text_len": 710,
+  "should_ocr": true,
+  "ocr_snippet": "MIB Fee Receipt\nCase ID: MiB-000033\nFee Status: paid\nle~\n/\n[\n.\na |\nPacket MIB-000033 / page 1 Synthetic hiring challenge docunjent\n\nSponsor Attestation Letter MIB-000033 | MIB Eyes Only\nTo MIB Intake:\nSponsor SPN-2193 attests that X anvoss Nexix is expected on Earth for reactor\nmaintenance.\nThe sponsor acknowledges responsibility for class MED-3 compliance and immediate\nreporting duties.\nThis attestation is valid only for the active case id printed in the packet\nheader.\nPacket MIB-000033 / page ",
+  "pred_risk": "none",
+  "pred_adj": "NEEDS_REVIEW",
+  "pred_conf": 0.35
+}

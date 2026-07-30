@@ -82,3 +82,15 @@ uv run --project solution mib-solution data/train artifacts/repro/train_predicti
 python3 scripts/evaluate.py --truth data/train_labels.csv \
   --submission artifacts/repro/train_predictions.jsonl --output-json artifacts/repro/train_eval.json
 ```
+
+
+## Modal high-agency farm (post promote-seg1)
+
+- **Volume:** `mib-data` (1000 train PDFs; pre-existing)
+- **App:** `mib-doc-experiments` (`solution/modal_app.py`)
+- **smoke:** 1000 PDFs mounted OK
+- **modal_residual_text:** 75.37 / 150 cat 0 (matches local promote_seg1)
+- **modal_residual_ocr:** **98.05 / 150** cat 0 (+22.68 vs text)
+- **modal_full_ocr:** **114.20 / 150** cat 0 (+7.25 vs promote_seg1 text 106.95)
+
+OCR path: poppler rasterize → tesseract; merge under `--- OCR_FALLBACK ---`; no case-id tables.

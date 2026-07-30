@@ -2,8 +2,12 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
-# Offline image: bake dependencies at build time only.
-COPY pyproject.toml README.md /app/
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    tesseract-ocr \
+    poppler-utils \
+  && rm -rf /var/lib/apt/lists/*
+
+COPY pyproject.toml README.md uv.lock /app/
 COPY src /app/src
 
 RUN pip install --no-cache-dir .

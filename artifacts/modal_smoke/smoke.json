@@ -1,0 +1,8 @@
+{
+  "ok": true,
+  "version": "0.1.0",
+  "volume": "mib-data",
+  "volume_train_pdfs": 1000,
+  "sample_MIB-000001": true,
+  "mount": "/data"
+}

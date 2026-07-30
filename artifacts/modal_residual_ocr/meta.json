@@ -1,0 +1,17 @@
+{
+  "run_name": "modal_residual_ocr",
+  "action": "score-residual-ocr",
+  "git": "497b6c91dca14dbfbc7e7c1d56820f7186c7f9a4",
+  "residual_version": "seg-v1",
+  "n_case_ids": 100,
+  "n_preds": 100,
+  "n_errors": 0,
+  "errors_sample": [],
+  "primary": 98.04675555555555,
+  "extraction": 27.455555555555556,
+  "classification": 56.0,
+  "calibration": 14.591200000000004,
+  "catastrophic": 0,
+  "volume": "mib-data",
+  "command": "modal run solution/modal_app.py --action score-residual-ocr --run-name modal_residual_ocr"
+}
