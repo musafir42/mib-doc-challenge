@@ -14,3 +14,4 @@ data/train/
 data/validation/
 *.zip
 *.zip.sha256
+worktrees/*/.venv/
