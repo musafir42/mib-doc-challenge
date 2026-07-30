@@ -1,0 +1,37 @@
+{
+  "oracle_labels": {
+    "calibration_score": 20.0,
+    "classification_score": 80.0,
+    "extraction_score": 50.0,
+    "missing_penalty": 0.0,
+    "total_score": 150.0
+  },
+  "label_only_adjudicate": {
+    "calibration_score": 11.988496,
+    "classification_score": 55.64,
+    "extraction_score": 50.0,
+    "missing_penalty": 0.0,
+    "total_score": 117.628496
+  },
+  "cheap_defaults": {
+    "calibration_score": 9.02,
+    "classification_score": 36.800000000000004,
+    "extraction_score": 4.951111111111111,
+    "missing_penalty": 0.0,
+    "total_score": 50.77111111111111
+  },
+  "baseline_extract_oracle_adj": {
+    "calibration_score": 19.6,
+    "classification_score": 80.0,
+    "extraction_score": 37.385555555555555,
+    "missing_penalty": 0.0,
+    "total_score": 136.98555555555555
+  },
+  "oracle_extract_always_review": {
+    "calibration_score": 11.739999999999998,
+    "classification_score": 36.800000000000004,
+    "extraction_score": 50.0,
+    "missing_penalty": 0.0,
+    "total_score": 98.54
+  }
+}

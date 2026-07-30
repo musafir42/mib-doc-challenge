@@ -1,0 +1,430 @@
+{
+  "hard_n": 541,
+  "reason_counts": {
+    "class_weak": 502,
+    "missed_deny": 204,
+    "extract_poor": 97,
+    "false_deny": 6
+  },
+  "missed_deny_n": 204,
+  "extract_poor_n": 97,
+  "residual_ids": [
+    "MIB-000074",
+    "MIB-000226",
+    "MIB-000293",
+    "MIB-000479",
+    "MIB-000718",
+    "MIB-000832",
+    "MIB-000855",
+    "MIB-000283",
+    "MIB-000381",
+    "MIB-000573",
+    "MIB-000097",
+    "MIB-000347",
+    "MIB-000422",
+    "MIB-000466",
+    "MIB-000570",
+    "MIB-000881",
+    "MIB-000987",
+    "MIB-000023",
+    "MIB-000318",
+    "MIB-000398",
+    "MIB-000452",
+    "MIB-000645",
+    "MIB-000101",
+    "MIB-000166",
+    "MIB-000220",
+    "MIB-000271",
+    "MIB-000383",
+    "MIB-000676",
+    "MIB-000752",
+    "MIB-000244",
+    "MIB-000297",
+    "MIB-000971",
+    "MIB-000134",
+    "MIB-000151",
+    "MIB-000312",
+    "MIB-000407",
+    "MIB-000717",
+    "MIB-000728",
+    "MIB-000747",
+    "MIB-000745",
+    "MIB-000065",
+    "MIB-000131",
+    "MIB-000239",
+    "MIB-000342",
+    "MIB-000404",
+    "MIB-000409",
+    "MIB-000440",
+    "MIB-000443",
+    "MIB-000457",
+    "MIB-000533",
+    "MIB-000536",
+    "MIB-000681",
+    "MIB-000743",
+    "MIB-000931",
+    "MIB-000986",
+    "MIB-000213",
+    "MIB-000476",
+    "MIB-000805",
+    "MIB-000945",
+    "MIB-000543",
+    "MIB-000039",
+    "MIB-000071",
+    "MIB-000182",
+    "MIB-000235",
+    "MIB-000299",
+    "MIB-000321",
+    "MIB-000344",
+    "MIB-000618",
+    "MIB-000633",
+    "MIB-000693",
+    "MIB-000002",
+    "MIB-000005",
+    "MIB-000015",
+    "MIB-000024",
+    "MIB-000027",
+    "MIB-000030",
+    "MIB-000034",
+    "MIB-000036",
+    "MIB-000037",
+    "MIB-000038",
+    "MIB-000047",
+    "MIB-000049",
+    "MIB-000051",
+    "MIB-000052",
+    "MIB-000053",
+    "MIB-000055",
+    "MIB-000057",
+    "MIB-000058",
+    "MIB-000060",
+    "MIB-000079",
+    "MIB-000003",
+    "MIB-000013",
+    "MIB-000016",
+    "MIB-000026",
+    "MIB-000031",
+    "MIB-000032",
+    "MIB-000033",
+    "MIB-000040",
+    "MIB-000054",
+    "MIB-000066"
+  ],
+  "samples": [
+    [
+      16.0,
+      {
+        "case_id": "MIB-000074",
+        "truth": "DENIED",
+        "pred": "NEEDS_REVIEW",
+        "cls_raw": 2.0,
+        "ext_frac": 0.0,
+        "reasons": [
+          "missed_deny",
+          "class_weak",
+          "extract_poor"
+        ],
+        "risk_truth": "illegible_biometrics",
+        "risk_pred": "none",
+        "fee_t": "paid",
+        "fee_p": "unknown",
+        "visa_t": "XW-2",
+        "visa_p": "unknown"
+      }
+    ],
+    [
+      16.0,
+      {
+        "case_id": "MIB-000226",
+        "truth": "DENIED",
+        "pred": "NEEDS_REVIEW",
+        "cls_raw": 2.0,
+        "ext_frac": 0.0,
+        "reasons": [
+          "missed_deny",
+          "class_weak",
+          "extract_poor"
+        ],
+        "risk_truth": "biohazard_red",
+        "risk_pred": "none",
+        "fee_t": "paid",
+        "fee_p": "unknown",
+        "visa_t": "MED-3",
+        "visa_p": "unknown"
+      }
+    ],
+    [
+      16.0,
+      {
+        "case_id": "MIB-000293",
+        "truth": "DENIED",
+        "pred": "NEEDS_REVIEW",
+        "cls_raw": 2.0,
+        "ext_frac": 0.0,
+        "reasons": [
+          "missed_deny",
+          "class_weak",
+          "extract_poor"
+        ],
+        "risk_truth": "planetary_embargo",
+        "risk_pred": "none",
+        "fee_t": "paid",
+        "fee_p": "unknown",
+        "visa_t": "MED-3",
+        "visa_p": "unknown"
+      }
+    ],
+    [
+      16.0,
+      {
+        "case_id": "MIB-000479",
+        "truth": "DENIED",
+        "pred": "NEEDS_REVIEW",
+        "cls_raw": 2.0,
+        "ext_frac": 0.0,
+        "reasons": [
+          "missed_deny",
+          "class_weak",
+          "extract_poor"
+        ],
+        "risk_truth": "illegible_biometrics",
+        "risk_pred": "none",
+        "fee_t": "paid",
+        "fee_p": "unknown",
+        "visa_t": "TRANSIT-7",
+        "visa_p": "unknown"
+      }
+    ],
+    [
+      16.0,
+      {
+        "case_id": "MIB-000718",
+        "truth": "DENIED",
+        "pred": "NEEDS_REVIEW",
+        "cls_raw": 2.0,
+        "ext_frac": 0.0,
+        "reasons": [
+          "missed_deny",
+          "class_weak",
+          "extract_poor"
+        ],
+        "risk_truth": "biohazard_red|illegible_biometrics",
+        "risk_pred": "none",
+        "fee_t": "paid",
+        "fee_p": "unknown",
+        "visa_t": "MED-3",
+        "visa_p": "unknown"
+      }
+    ],
+    [
+      16.0,
+      {
+        "case_id": "MIB-000832",
+        "truth": "DENIED",
+        "pred": "NEEDS_REVIEW",
+        "cls_raw": 2.0,
+        "ext_frac": 0.0,
+        "reasons": [
+          "missed_deny",
+          "class_weak",
+          "extract_poor"
+        ],
+        "risk_truth": "planetary_embargo",
+        "risk_pred": "none",
+        "fee_t": "paid",
+        "fee_p": "unknown",
+        "visa_t": "XW-1",
+        "visa_p": "unknown"
+      }
+    ],
+    [
+      16.0,
+      {
+        "case_id": "MIB-000855",
+        "truth": "DENIED",
+        "pred": "NEEDS_REVIEW",
+        "cls_raw": 2.0,
+        "ext_frac": 0.0,
+        "reasons": [
+          "missed_deny",
+          "class_weak",
+          "extract_poor"
+        ],
+        "risk_truth": "biohazard_red",
+        "risk_pred": "none",
+        "fee_t": "waived",
+        "fee_p": "paid",
+        "visa_t": "MED-3",
+        "visa_p": "unknown"
+      }
+    ],
+    [
+      15.555,
+      {
+        "case_id": "MIB-000283",
+        "truth": "DENIED",
+        "pred": "NEEDS_REVIEW",
+        "cls_raw": 2.0,
+        "ext_frac": 0.089,
+        "reasons": [
+          "missed_deny",
+          "class_weak",
+          "extract_poor"
+        ],
+        "risk_truth": "illegible_biometrics",
+        "risk_pred": "none",
+        "fee_t": "paid",
+        "fee_p": "paid",
+        "visa_t": "MED-3",
+        "visa_p": "unknown"
+      }
+    ],
+    [
+      15.555,
+      {
+        "case_id": "MIB-000381",
+        "truth": "DENIED",
+        "pred": "NEEDS_REVIEW",
+        "cls_raw": 2.0,
+        "ext_frac": 0.089,
+        "reasons": [
+          "missed_deny",
+          "class_weak",
+          "extract_poor"
+        ],
+        "risk_truth": "biohazard_red",
+        "risk_pred": "none",
+        "fee_t": "paid",
+        "fee_p": "paid",
+        "visa_t": "MED-3",
+        "visa_p": "unknown"
+      }
+    ],
+    [
+      15.555,
+      {
+        "case_id": "MIB-000573",
+        "truth": "DENIED",
+        "pred": "NEEDS_REVIEW",
+        "cls_raw": 2.0,
+        "ext_frac": 0.089,
+        "reasons": [
+          "missed_deny",
+          "class_weak",
+          "extract_poor"
+        ],
+        "risk_truth": "illegible_biometrics",
+        "risk_pred": "none",
+        "fee_t": "paid",
+        "fee_p": "paid",
+        "visa_t": "XW-1",
+        "visa_p": "unknown"
+      }
+    ],
+    [
+      15.11,
+      {
+        "case_id": "MIB-000097",
+        "truth": "DENIED",
+        "pred": "NEEDS_REVIEW",
+        "cls_raw": 2.0,
+        "ext_frac": 0.178,
+        "reasons": [
+          "missed_deny",
+          "class_weak",
+          "extract_poor"
+        ],
+        "risk_truth": "none",
+        "risk_pred": "none",
+        "fee_t": "paid",
+        "fee_p": "unknown",
+        "visa_t": "XW-2",
+        "visa_p": "unknown"
+      }
+    ],
+    [
+      15.11,
+      {
+        "case_id": "MIB-000347",
+        "truth": "DENIED",
+        "pred": "NEEDS_REVIEW",
+        "cls_raw": 2.0,
+        "ext_frac": 0.178,
+        "reasons": [
+          "missed_deny",
+          "class_weak",
+          "extract_poor"
+        ],
+        "risk_truth": "none",
+        "risk_pred": "none",
+        "fee_t": "unpaid",
+        "fee_p": "unknown",
+        "visa_t": "MED-3",
+        "visa_p": "unknown"
+      }
+    ],
+    [
+      15.11,
+      {
+        "case_id": "MIB-000422",
+        "truth": "DENIED",
+        "pred": "NEEDS_REVIEW",
+        "cls_raw": 2.0,
+        "ext_frac": 0.178,
+        "reasons": [
+          "missed_deny",
+          "class_weak",
+          "extract_poor"
+        ],
+        "risk_truth": "none",
+        "risk_pred": "none",
+        "fee_t": "paid",
+        "fee_p": "unknown",
+        "visa_t": "XW-2",
+        "visa_p": "unknown"
+      }
+    ],
+    [
+      15.11,
+      {
+        "case_id": "MIB-000466",
+        "truth": "DENIED",
+        "pred": "NEEDS_REVIEW",
+        "cls_raw": 2.0,
+        "ext_frac": 0.178,
+        "reasons": [
+          "missed_deny",
+          "class_weak",
+          "extract_poor"
+        ],
+        "risk_truth": "illegible_biometrics",
+        "risk_pred": "illegible_biometrics",
+        "fee_t": "paid",
+        "fee_p": "unknown",
+        "visa_t": "XW-2",
+        "visa_p": "unknown"
+      }
+    ],
+    [
+      15.11,
+      {
+        "case_id": "MIB-000570",
+        "truth": "DENIED",
+        "pred": "NEEDS_REVIEW",
+        "cls_raw": 2.0,
+        "ext_frac": 0.178,
+        "reasons": [
+          "missed_deny",
+          "class_weak",
+          "extract_poor"
+        ],
+        "risk_truth": "none",
+        "risk_pred": "none",
+        "fee_t": "unpaid",
+        "fee_p": "unknown",
+        "visa_t": "DIP-1",
+        "visa_p": "unknown"
+      }
+    ]
+  ]
+}

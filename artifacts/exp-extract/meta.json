@@ -1,0 +1,17 @@
+{
+  "run_name": "exp-extract",
+  "stage": "Explore",
+  "git": "283876d430c30869910e669add90fcfe6be6139c",
+  "residual_version": "seg-v1",
+  "n_case_ids": 100,
+  "primary": 64.23757333333333,
+  "extraction": 18.333333333333332,
+  "classification": 33.199999999999996,
+  "calibration": 12.704240000000004,
+  "catastrophic": 0,
+  "baseline_primary": 62.20870222222223,
+  "baseline_catastrophic": 0,
+  "delta_primary": 2.0288711111111013,
+  "worktree": "worktrees/exp-extract",
+  "command": "uv run --project worktrees/exp-extract python predict residual case_ids -> artifacts/exp-extract/predictions.jsonl; python3 scripts/evaluate.py --truth artifacts/residual_truth.csv --submission artifacts/exp-extract/predictions.jsonl --output-json artifacts/exp-extract/eval.json --case-scores-jsonl artifacts/exp-extract/case_scores.jsonl"
+}

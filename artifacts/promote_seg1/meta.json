@@ -1,0 +1,13 @@
+{
+  "run_name": "promote_seg1",
+  "residual_version": "seg-v1",
+  "residual_primary": 75.37393333333334,
+  "residual_cat": 0,
+  "train_primary": 106.9537093333333,
+  "train_cat": 0,
+  "git": "283876d430c30869910e669add90fcfe6be6139c",
+  "merged": [
+    "exp-extract/extract.py",
+    "exp-adjudicate/adjudicate.py (minus multi-field APPROVED)"
+  ]
+}
