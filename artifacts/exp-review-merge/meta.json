@@ -1,0 +1,17 @@
+{
+  "run_name": "exp-review-merge",
+  "action": "score-residual-ocr",
+  "git": "3497546b0ae7805005644dffb6b3875a7f7c6e97",
+  "residual_version": "seg-v1",
+  "n_case_ids": 100,
+  "n_preds": 100,
+  "n_errors": 0,
+  "errors_sample": [],
+  "primary": 102.47369333333333,
+  "extraction": 30.933333333333334,
+  "classification": 57.0,
+  "calibration": 14.54036,
+  "catastrophic": 0,
+  "volume": "mib-data",
+  "command": "modal run solution/modal_app.py --action score-residual-ocr --run-name exp-review-merge"
+}

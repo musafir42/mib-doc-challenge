@@ -1,18 +1,19 @@
-# Grok Build Playbook — Attack a Hard Evaluation Challenge
+# Grok Build Playbook — MIB Doc Challenge
 
-**What this is:** How to **think, measure, and parallelize** on a constrained competition so an agent can **build and iteratively improve** a solution.  
-**What this is not:** A product recipe. No prior-team scores, stacks, or field lists. Discover those from the **challenge repo** (always wins on conflict).
+**What this is:** How to **think, measure, and improve** a constrained offline evaluation challenge.  
+**What this is not:** A product recipe. Challenge manuals, scorer, and data in this repo always win on conflict.
 
 ### Hard process constraints
 
 | Constraint | Rule |
 |------------|------|
 | **Python packaging** | **`uv` only** (`uv init` / `uv add` / `uv sync` / `uv run`). No pip/poetry/conda as primary. |
-| **Experiment compute** | Prefer **Modal** as the batch farm for residual and full-data scoring. Product submission still follows the challenge (often offline Docker). |
+| **Experiment compute** | Prefer a **single high-CPU cloud VM** (or local multi-core) + **Docker** for residual / full train / val. Product submission is offline Docker. |
+| **Modal** | **Optional / legacy only.** Not the default path. Do not reintroduce serverless farms unless the human asks. |
 | **Generalization** | No case-id answer tables / runtime label lookup in product code. |
 | **You are the merge owner** | Unless the human names someone else, **you** integrate worktrees, write the scoreboard, enforce kills, and re-score residual on main. |
 
-### Named stages (not numbered phases)
+### Named stages
 
 ```text
 Setup → Baseline → Segment → Explore → Integrate → Ship-align → Stretch
@@ -22,14 +23,151 @@ Setup → Baseline → Segment → Explore → Integrate → Ship-align → Stre
 |-------|--------------------|---------------------|
 | **Setup** | Clean forked repo open | Prereqs OK; layout dirs present; scorer produced a **number** |
 | **Baseline** | Building first real system | Tagged system + official eval on scoreboard |
-| **Segment** | Slicing errors | **Hard exit:** residual frozen **and** residual harness documented **and** ceiling note written |
-| **Explore** | Parallel worktrees | **Hard entry:** Segment exit only. Default: multi-agent. Each run has FINDINGS + residual A/B |
+| **Segment** | Slicing errors | Residual frozen **and** residual harness documented **and** ceiling note written |
+| **Explore** | Parallel worktrees | Segment exit only. Each run has FINDINGS + residual A/B |
 | **Integrate** | Merge owner promoting | Residual re-scored on **main**; scoreboard row; tag if improved |
-| **Ship-align** | Matching ship to measured config | Offline/Docker smoke OK with same lockfile/flags — **required before calling a win** |
+| **Ship-align** | Matching ship to measured config | Offline Docker smoke + full train/val with same lockfile/flags |
 | **Stretch** | High-EV residuals only | Catastrophic metric still safe |
 
-**Serial until residual is frozen; multi-agent Explore is the default after that.**  
-Do not invent a separate “solo lifestyle.” One worktree during Explore is fine when only one high-EV slice exists — that is still Explore.
+---
+
+## Campaign handoff (read this first on a new machine)
+
+**Status (2026-07-30):** Integrate candidate is in `solution/`. Ship-align **not** complete (no full Docker train+val package yet). Modal farm is **retired** as the default path — continue on a high-CPU box.
+
+### Best measured scores (official scorer, /150, cat = catastrophic false approvals)
+
+| System | Slice | Primary | Cat | Artifacts |
+|--------|-------|--------:|----:|-----------|
+| **promote_integrate** (current `solution/`) | residual seg-v1 n=100 | **108.78** | 0 | `artifacts/promote_integrate/` |
+| **promote_integrate** | train full n=1000 | **119.27** | 0 | `artifacts/promote_integrate_full/` |
+| promote_ocr (Modal OCR, earlier) | train full | 114.20 | 0 | `artifacts/modal_full_ocr/` |
+| Best single residual Explore | deny-recall | 104.87 | 0 | `artifacts/exp-deny-recall/` |
+| residual baseline (Segment freeze) | residual | 62.21 | 0 | `artifacts/residual_baseline/` |
+| Docker smoke (10 PDFs) | smoke | 132.13* | 0 | `artifacts/docker_ship/` (*not comparable to full train*) |
+
+Residual identity: `artifacts/residual.json` version **seg-v1** (n=100). Only merge owner rewrites it.
+
+### What is in `solution/` (product)
+
+| Module | Role |
+|--------|------|
+| `pipeline.py` | PDF → text/OCR merge → extract → adjudicate → calibrate |
+| `ocr.py` | poppler + tesseract; deskew/stamp crops; TMPDIR-safe under Docker `--read-only` |
+| `extract.py` | multi-source labeled fields + trusted-text filters |
+| `evidence.py` | page roles / precedence helpers (integrated where used) |
+| `adjudicate.py` | Finding notes, deny recall, review-safe APPROVED only |
+| `calibrate.py` | path/feature confidence (Brier); does not change labels |
+| `cli.py` / `run.sh` | offline entrypoints |
+| `Dockerfile` | tesseract + poppler + pip install; image ~0.1 GiB |
+
+**Do not** put Modal, cloud OCR APIs, or LLMs in the submission runtime (challenge rules).
+
+### What was removed / frozen (do not resurrect by default)
+
+- Modal sandbox bulk ship scripts (`ship_docker_*`, `ship_align_*`, `modal_bulk_runner`)
+- Stale multi-agent ACTIVE rows (cleared)
+- Modal as default experiment farm
+
+Historical Modal residual/full scores remain on the scoreboard as audit trail only.
+
+### Next work on the high-CPU machine (priority order)
+
+1. **Bootstrap box** — see [New machine bootstrap](#new-machine-bootstrap) below.
+2. **Re-score residual on main** with local parallel workers → confirm ~108.78.
+3. **Full train Docker score** (1000 PDFs) with challenge-like flags → must land near **119.27**.
+4. **Validation preds** (5000 PDFs, no labels) → package for submission.
+5. **Ship-align** checklist in scoreboard; `validate_submission.py`.
+6. **Segment-2 / Stretch** only after ship path is honest: slice integrate failures, residual-first Explore.
+
+### Known landmines
+
+| Issue | Mitigation |
+|-------|------------|
+| Challenge root FS read-only; only `/tmp` writable | `run.sh` forces `TMPDIR`/`HOME`/`XDG_CACHE` to `/tmp`; OCR uses `output_folder=/tmp` |
+| Catastrophic = APPROVED when truth DENIED | Never auto-APPROVED from multi-field heuristics alone; need trusted Finding APPROVED |
+| Residual scale ≠ full train | Both are /150 max; residual is a hard subset — expect lower absolute residual scores |
+| Injection / SYSTEM answer-key lines | Prefer trusted labeled blocks + OCR of visible stamps over free-form full-text harvest |
+| Image-only DQ / biohazard stamps | OCR path is required; text-only collapses residual |
+
+Authoritative longer trail: `artifacts/AUDIT.md`, `artifacts/HANDOFF.md`, `artifacts/SCOREBOARD.md`.
+
+---
+
+## New machine bootstrap
+
+Target: **one high-CPU VM** (≈16–32 vCPU, 32–64 GB RAM, ≥40 GB free disk). No Modal required.
+
+```bash
+# 1) Clone (or rsync) the fork — you need git history + solution + artifacts + data layout
+git clone https://github.com/musafir42/mib-doc-challenge.git
+cd mib-doc-challenge
+
+# 2) System packages (Debian/Ubuntu family)
+sudo apt-get update
+sudo apt-get install -y git python3 python3-venv docker.io \
+  tesseract-ocr tesseract-ocr-eng poppler-utils
+
+# 3) uv
+curl -LsSf https://astral.sh/uv/install.sh | sh
+export PATH="$HOME/.local/bin:$PATH"
+
+# 4) Data — train/validation PDFs are gitignored; restore from the challenge zip or your laptop:
+#    data/train/*.pdf (1000), data/validation/*.pdf (5000), data/train_labels.csv
+#    See data/README.md / DATASET_CARD.md. Do NOT commit PDFs.
+
+# 5) Product env
+cd solution && uv sync && cd ..
+
+# 6) Scorer smoke (must produce a number)
+python3 scripts/evaluate.py --help >/dev/null
+# residual path: see solution/experiments/RESIDUAL.md
+
+# 7) Docker smoke (10 PDFs)
+docker build -t mib-submission:latest solution/
+# then bind-mount 10 train PDFs as in artifacts/docker_ship/READY.md
+```
+
+**Parallel residual / train locally** (prefer this over any cloud map API):
+
+```bash
+# Example: residual with N workers (GNU parallel or a small Python pool)
+# See solution/experiments/RESIDUAL.md for the canonical residual harness.
+uv run --project solution python -c "
+from concurrent.futures import ProcessPoolExecutor, as_completed
+from pathlib import Path
+import json, os
+from mib_solution.pipeline import predict_pdf, write_jsonl
+root = Path('.')
+ids = json.loads((root/'artifacts/residual.json').read_text())['case_ids']
+workers = int(os.environ.get('MIB_WORKERS', os.cpu_count() or 4))
+def one(cid):
+    return predict_pdf(root/'data/train'/f'{cid}.pdf')
+preds = []
+with ProcessPoolExecutor(max_workers=workers) as ex:
+    futs = [ex.submit(one, c) for c in ids]
+    for f in as_completed(futs):
+        preds.append(f.result())
+out = root/'artifacts/residual_local'
+out.mkdir(parents=True, exist_ok=True)
+write_jsonl(out/'predictions.jsonl', preds)
+print(len(preds), 'workers=', workers)
+"
+python3 scripts/evaluate.py \
+  --truth artifacts/residual_truth.csv \
+  --submission artifacts/residual_local/predictions.jsonl \
+  --output-json artifacts/residual_local/eval.json \
+  --case-scores-jsonl artifacts/residual_local/case_scores.jsonl
+```
+
+For full train / validation, same pattern over all PDFs in `data/train` or `data/validation`, or:
+
+```bash
+docker run --rm --network none --cpus $(nproc) --memory 32g \
+  --read-only --tmpfs /tmp:rw,nosuid,nodev,size=8g \
+  -v "$PWD/data/train:/input:ro" -v "$PWD/artifacts/ship_train:/output" \
+  mib-submission:latest /input /output/predictions.jsonl
+```
 
 ---
 
@@ -37,139 +175,50 @@ Do not invent a separate “solo lifestyle.” One worktree during Explore is fi
 
 | Term | Meaning |
 |------|---------|
-| **Repo root** | You are already in a **clean forked** challenge repo (cwd = that root). Rules, data, scorer live here; add `solution/` for product code. |
+| **Repo root** | Forked challenge repo cwd. Rules, data, scorer live here; product in `solution/`. |
 | **`solution/`** | Product code (pipeline, Docker, uv project). |
-| **`artifacts/`** | Preds, evals, residual freeze, scoreboard, agency registry. |
-| **`worktrees/`** | Isolated copies of `solution/` for parallel experiments. |
-| **Baseline** | Runnable system + official score + note + git tag. Also a stage name. |
-| **Official score** | Challenge evaluation script output only. |
-| **Catastrophic error** | Heavily penalized error types from scorer docs — do not invent the list. |
-| **Ceiling check** | Diagnostic: perfect inputs to a stage → score? Finds the bottleneck. |
-| **Label-only decision check** | Decision rules on gold labels only (skip reading inputs). Not a submission. |
-| **Failure slice** | Cases sharing an error pattern (analysis only). |
-| **Residual** | Frozen hard failure subset for cheap A/B (`artifacts/residual.json`). |
-| **Residual A/B** | Same residual file, two systems; compare official metrics. |
-| **Promote / Kill** | Accept into `solution/` / stop experiment. |
-| **Merge owner** | Integrates worktrees, scoreboard, kills — **default: the orchestrating agent**. |
-| **Scoreboard** | `artifacts/SCOREBOARD.md` only; merge owner appends. |
-| **EV** | `#cases × points_if_fixed × P(generalizes) − catastrophe_risk`. |
-| **Modal** | Default cloud batch farm for experiments. Not the offline product. |
-| **uv** | Required Python package/env manager. |
-
-**Assumption:** you are already in a **clean forked** challenge repo (cwd = repo root). Do **not** re-fork or re-clone. Paths are relative to that root.
+| **`artifacts/`** | Preds, evals, residual freeze, scoreboard, agency, handoff. |
+| **`worktrees/`** | Isolated copies of `solution/` for parallel experiments. Prefer FINDINGS + `artifacts/<name>/` over committing full trees. |
+| **Official score** | Challenge `scripts/evaluate.py` output only. Max **150**. |
+| **Catastrophic** | Scorer: false APPROVED when truth DENIED. |
+| **Residual** | Frozen hard subset `artifacts/residual.json` (seg-v1, n=100). |
+| **Ship-align** | Docker offline path matches measured config (`uv.lock`, flags, OCR deps). |
+| **uv** | Required Python package manager. |
 
 ---
 
 ## Setup
-
-You are in the clean forked repo. Confirm tools, create layout dirs, prove the scorer.
 
 ### Prerequisites
 
 | Need | Check |
 |------|--------|
 | git | `git --version` |
-| Python 3.x | `python3 --version` |
-| **uv** | `uv --version` — https://docs.astral.sh/uv/ |
-| Docker | `docker info` if submission is Docker |
-| git-lfs | if challenge README says so |
-| **Modal** | CLI + login before large jobs |
+| Python 3.12+ | `python3 --version` |
+| **uv** | `uv --version` |
+| Docker | `docker info` |
+| tesseract + poppler | system or Docker image |
+| git-lfs | if README requires |
+| **CPU box** | Prefer ≥16 cores for full train/val |
 
-Data should already be present per the challenge README; if not, fetch it **in this repo only** (e.g. `git lfs pull`) — still no new clone.
-
-### Layout (under this repo root)
-
-```bash
-# cwd = clean forked challenge repo
-mkdir -p solution artifacts/agency worktrees
-git rev-parse HEAD > artifacts/challenge_sha.txt
-```
+### Layout
 
 ```text
-.                           ← repo root (you are here)
+.                           ← repo root
   manuals, data/, scripts/
-  solution/                 ← product (uv)
-  artifacts/                ← SCOREBOARD.md, residual.json, runs, agency/
-  worktrees/                ← parallel experiments
+  solution/                 ← product (uv + Docker)
+  artifacts/                ← SCOREBOARD, residual, runs, HANDOFF
+  worktrees/                ← experiments (optional isolation)
+  GROK_BUILD.md             ← this playbook
 ```
-
-```bash
-cd solution && uv init   # if empty; then uv add / uv sync / uv run
-git -C .. add solution && git -C .. commit -m "scaffold solution/"
-```
-
-Scaffold early. **Do not** tag a baseline until the scorer has produced a real number.
-
-### Prove the scorer
-
-Tiny schema-valid preds → official evaluate → **numeric** artifact under `artifacts/scorer_smoke/`.  
-`--help` is not proof.
-
-### Modal (experiment compute)
-
-| Role | Where |
-|------|--------|
-| Product / submission | Challenge path (often offline Docker) |
-| Experiments | Modal: residual, full-data after promote, A/B |
-
-- Cached image + Volume for data; Functions not idle sandboxes; cap concurrency.  
-- Residual before full; pull `artifacts/<run>/` every time; same `solution/uv.lock` as ship.  
-- Budget; never bake tokens into images.
-
-```bash
-modal setup && modal app list
-# solution/modal_app.py — smoke / score-residual / score-full
-```
-
-### Modal layout: shared data + parallel workers
-
-Conceptually many workers share **one** input store and keep **isolated** code:
-
-```text
-shared read-only data (Modal Volume)   e.g. /data/train/*.pdf
-        │
-   ┌────┼────┐
-   ▼    ▼    ▼
- worker worker worker   ← each has its own code tree/branch
-   │    │    │
-   └────┼────┘
-        ▼
- artifacts → artifacts/<run_name>/ on the orchestrator
-```
-
-| Piece | Do | Don’t |
-|-------|-----|--------|
-| **Inputs** | Upload corpus **once** to a Volume; mount read-only | Copy full data into every worker or rebuild into the image each run |
-| **Code isolation** | One branch / copy / image per experiment | Shared mutable `solution/` across parallel writers |
-| **Bulk score** | Prefer **Functions** + shard map; bill while working | Long-lived idle **Sandboxes** “just in case” |
-| **Sticky agent shell** | Short-lived **Sandbox**: create → work → **terminate** | Leave sandboxes running idle |
-| **git worktree** | On the **orchestrator** fork for multi-agent isolation | Require worktree inside every remote worker — one checkout/branch is enough |
-| **git clone per worker** | Prefer image bake or code Volume; avoid N full clones | Full history clone on every cold start |
-| **Merge** | Only on orchestrator into `solution/` after residual gates | Merge inside remote boxes with no scoreboard |
-
-**Rule of thumb:** measure many independent cases → **Functions** + shared Volume; interactive agent session → **short-lived Sandbox**; parallel code hypotheses → N isolated code trees + **same** data Volume. Sandboxes are not automatically cheaper — **idle time** is.
-
-### Process drill (before product ambition)
-
-Prove the **method** works empty-handed (~30 minutes). If this fails, do not trust multi-agent product work.
-
-- [ ] Layout: `solution/`, `artifacts/`, `worktrees/`  
-- [ ] Scorer smoke number in `artifacts/scorer_smoke/`  
-- [ ] Dummy `artifacts/residual.json` (any small id list)  
-- [ ] Stub `solution/experiments/RESIDUAL.md` describing how residual will be scored  
-- [ ] One dummy `worktrees/drill/experiments/drill/FINDINGS.md` with residual A/B table skeleton  
-- [ ] `artifacts/SCOREBOARD.md` with one row  
-- [ ] `artifacts/agency/ACTIVE.md` exists  
 
 ### Setup done when
 
-- [ ] Already in clean forked repo root  
-- [ ] Prereqs (uv + Modal if farming)  
-- [ ] Data present; `artifacts/challenge_sha.txt` written  
-- [ ] `solution/` + uv scaffold  
+- [ ] Repo root with data present  
+- [ ] `uv sync` in `solution/`  
 - [ ] Numeric scorer smoke  
-- [ ] Process drill checked  
-- [ ] Modal smoke (recommended)  
+- [ ] Residual harness once (`solution/experiments/RESIDUAL.md`)  
+- [ ] Docker image builds  
 
 ---
 
@@ -177,33 +226,13 @@ Prove the **method** works empty-handed (~30 minutes). If this fails, do not tru
 
 | Axis | Question |
 |------|----------|
-| Objective | What does the official scorer maximize? |
-| Constraints | Offline? size? latency? forbidden APIs? |
-| Risk | Which mistakes are catastrophic in the docs? |
-| Uncertainty | What does the public manual leave incomplete? |
+| Objective | Maximize official total score (/150) |
+| Constraints | Offline Docker; size; latency; no cloud LLMs/OCR APIs in runtime |
+| Risk | Catastrophic false approvals |
+| Uncertainty | Private test; injection/hidden fields |
 
-**Win:** measure → parallel Explore → promote/kill → Integrate → Ship-align.  
-**Lose:** full-data thrash, Explore without residual, agents with no ACTIVE row, memorizing train ids.
-
----
-
-## Mental model (questions, not a stack)
-
-Infer stages from the submission contract and manuals — do not assume libraries.
-
-**Ceiling checks** (diagnostics):
-
-| Check | Question |
-|-------|----------|
-| Label-only decision | Perfect structured inputs → decision score? |
-| Cheapest legal path | Minimal input reading → score? |
-| Costly path on a small sample | Extra cost worth it? |
-
-Write the conclusion down (required in Segment).
-
-**Trust:** if the manual describes injections/conflicts, define evidence precedence from the manual before clever parsers. Prefer abstain/review when the scorer rewards that over catastrophes.
-
-**Score economics:** for every change, which error cell improves/worsens, net EV including catastrophes?
+**Win:** residual-first → promote → **Ship-align** (Docker full train + val preds).  
+**Lose:** full-data thrash without residual; id memorization; “win” without Docker honesty.
 
 ---
 
@@ -211,205 +240,61 @@ Write the conclusion down (required in Segment).
 
 ```text
 Baseline → Segment (residual + harness + ceiling)
-  → Explore (multi-agent default) → Residual A/B
+  → Explore → Residual A/B
   → Integrate → Ship-align → (Stretch)
 ```
 
----
+### Baseline
 
-## Baseline
+Runnable pipeline, schema-valid preds, eval under `artifacts/baseline/`, scoreboard row.
 
-Runnable pipeline, schema-valid preds, eval under `artifacts/baseline/`, note, git tag `baseline`.  
-Scoreboard row. Stop feature spam until **Segment**.
+### Segment (hard gate)
 
----
+- `artifacts/residual.json` frozen (merge owner only)
+- `solution/experiments/RESIDUAL.md` command path
+- residual baseline scored once
+- `artifacts/ceiling/BINDING.md`
 
-## Segment (hard gate before Explore)
+### Explore
 
-### Taxonomy
+- Worktree or branch per hypothesis; `experiments/<name>/FINDINGS.md` required
+- Residual A/B before promote claims
+- Register in `artifacts/agency/ACTIVE.md`; kill stale rows
+- Multi-agent optional; one high-EV slice is fine
 
-From preds × labels: scorer-relevant confusion cells; wrong outputs; input-shape clusters **from data** (don’t import a prior team’s names).  
-Slice id lists = analysis only, never product logic.
+### Integrate
 
-### Freeze residual
+1. Port minimal patch into `solution/`  
+2. Re-score residual on main  
+3. Scoreboard row  
+4. Full train only after residual promote criteria  
+5. Tag if improved  
 
-`artifacts/residual.json` — **only merge owner may rewrite**.
+### Ship-align (required before calling a win)
 
-### Residual harness (required file)
+- [ ] Same `solution/uv.lock` in Docker image  
+- [ ] Same OCR/env flags as measured  
+- [ ] Docker smoke (`artifacts/docker_ship/`) green  
+- [ ] Full train Docker score ≈ measured integrate  
+- [ ] Validation preds written + `validate_submission.py`  
+- [ ] Scoreboard notes Ship-align OK  
 
-`solution/experiments/RESIDUAL.md` must document **one** command path:
+### Stretch
 
-```text
-Score artifacts/residual.json with current solution/ →
-  artifacts/<run_name>/predictions.<ext>
-  artifacts/<run_name>/eval.json
-  artifacts/<run_name>/meta.json   # git sha, residual identity, command
-
-Prefer Modal. Local uv run for tiny debug.
-```
-
-### Ceiling deliverable (required file)
-
-`artifacts/ceiling/BINDING.md` (or `.json`):
-
-```markdown
-# Binding stage
-- Label-only decision: <metric or N/A + why>
-- Cheap path: <metric>
-- Conclusion: binding stage = <…>
-- Therefore we invest next in: <…>
-```
-
-If gold fields do not exist, write **N/A** and still state best-guess binding stage from manuals + errors.
-
-### Segment done when (all required)
-
-- [ ] `artifacts/residual.json` frozen  
-- [ ] `solution/experiments/RESIDUAL.md` exists  
-- [ ] Residual harness has been run once (baseline residual row on scoreboard)  
-- [ ] `artifacts/ceiling/BINDING.md` written  
-
-**No Explore until every box is checked.**
-
----
-
-## Explore (multi-agent default)
-
-**Entry rule (hard):** Segment done checklist complete.  
-**Default after entry:** spawn **2–4** independent hypothesis agents with module ownership.  
-**Degenerate case:** only one high-EV slice → one worktree still counts as Explore (not a separate solo philosophy).
-
-**Forbidden:** multi-agent product work before Segment done.
-
-### Agency control plane
-
-`artifacts/agency/ACTIVE.md` — merge owner maintains:
-
-```markdown
-| name | worktree | goal | started | deadline | status |
-|------|----------|------|---------|----------|--------|
-| exp-a | worktrees/exp-a | … | ISO time | +15m | running/done/killed |
-```
-
-On every wake, merge owner:
-
-- Kills rows past deadline with no FINDINGS + eval artifact  
-- Appends a scoreboard note for kills  
-
-### Worktrees
-
-```bash
-rsync -a --exclude .venv solution/ worktrees/exp-<name>/
-# edit only worktrees/exp-<name>/
-```
-
-| Path | Role |
-|------|------|
-| `worktrees/exp-<name>/` | Code |
-| `worktrees/exp-<name>/experiments/<name>/FINDINGS.md` | Required |
-| `artifacts/<name>/` | predictions, eval.json, meta.json |
-
-Before fan-out: **module ownership map** (which paths each exp may touch). Overlap → serialize.
-
-### Subagent spawn template
-
-```text
-GOAL: <one sentence>
-EDIT ONLY: worktrees/exp-<name>/
-READ-ONLY: manuals, data/, scripts/, artifacts/residual.json
-
-CONSTRAINTS: challenge rules; no case-id tables; catastrophic types from scorer;
-  do not merge into solution/; do not rewrite residual.json.
-
-DELIVERABLES:
-  - code in worktree
-  - experiments/<name>/FINDINGS.md
-  - artifacts/<name>/{predictions,eval.json,meta.json} via residual harness
-
-SUCCESS: residual beats scoreboard baseline residual row; catastrophes not worse
-KILL IF: deadline in ACTIVE.md; no real deliverable; tool loop; worse catastrophes
-OUT OF SCOPE: <list>
-```
-
-Register the agent in `ACTIVE.md` **before** spawn.
-
-### FINDINGS.md skeleton
-
-```markdown
-# <name>
-## Hypothesis
-Because we observe … we believe … so changing … should improve … without …
-
-## Method
-## Residual A/B
-| system | primary | catastrophic | notes |
-| baseline residual | | | |
-| this run | | | |
-
-## Decision: promote | kill | continue
-## Risks (generalization / cost)
-```
-
-### Writer counts
-
-| Stage | Writers |
-|-------|--------:|
-| Setup / Baseline / Segment | 0–1 |
-| **Explore** (after hard gate) | **2–4 default** |
-| Integrate | 1 (merge owner) |
-
----
-
-## Integrate (merge owner — default: you)
-
-After any experiment finishes (same session turn if possible):
-
-1. Read FINDINGS + residual A/B.  
-2. Port minimal patch into `solution/` (cherry-pick or diff — pick one style).  
-3. Re-run residual harness on **main** `solution/`. If fail → no tag; fix or revert.  
-4. Append **one** scoreboard row (merge owner only).  
-5. If promote: tag `promote-<shortname>`; require **Ship-align** before declaring a campaign win.  
-6. Update ACTIVE.md; remove/archive worktree.
-
-### Promote vs win
-
-| Claim | Requires |
-|-------|----------|
-| **Promote** candidate | Residual pass on main; no catastrophic regression; scoreboard row |
-| **Win / ship-ready** | Promote **plus Ship-align** (below) |
-
-Full-data Modal score only after residual promote criteria.  
-Scoreboard: no `full` row without a residual row for that change name.
-
----
-
-## Ship-align (required before calling a win)
-
-- [ ] Same `solution/uv.lock` (or documented equivalent) on Modal image and submission image  
-- [ ] Same env flags for measured vs ship config  
-- [ ] Offline/Docker (or challenge-mandated) smoke on a small case set succeeds  
-- [ ] Scoreboard row notes ship-align OK  
-
-Modal-only glory without this is **not** a win.
-
----
-
-## Stretch
-
-Only if catastrophic metric remains safe. High-EV residuals only. Still residual-first; still multi-agent Explore when multiple slices.
+High-EV residual slices only; catastrophic must stay safe.
 
 ---
 
 ## Complexity and compute
 
-Pay for cost when residual A/B pays: gate expensive work → cheap path first → extra tools → always-on expensive combos last.
-
 | Work | Where |
 |------|--------|
 | Edit / tiny debug | Local `uv run` in `solution/` |
-| Residual A/B | **Modal** (default) |
-| Full labeled set | **Modal** (rare, after promote) |
-| Submission fidelity | Challenge path (often offline Docker) |
+| Residual A/B | **Same machine**, multi-process / Docker |
+| Full train / validation | **High-CPU VM** + Docker or ProcessPool |
+| Submission | Offline Docker only |
+
+Pay for OCR cost when residual A/B pays. Cheap text path first when debugging extract rules.
 
 ---
 
@@ -420,73 +305,35 @@ Pay for cost when residual A/B pays: gate expensive work → cheap path first �
 | date | name | stage | slice | primary | catastrophic | notes | artifacts | git |
 |------|------|-------|-------|---------|--------------|-------|-----------|-----|
 
-Stage names only. Residual row before full-data row. Keep losers.  
-Optional: refuse to log `full` without prior residual row for same `name`.
+Residual row before full-data row for the same change. Keep losers.
 
 ---
 
 ## Anti-patterns
 
-Explore before Segment hard exit · full-data every tweak · shared edit dirs · no ACTIVE.md · no kill · no residual · Modal ≠ Docker lockfile · pip-first · id memorization · “win” without Ship-align · renumbering phases · treating multi-agent as optional forever after residual exists (default is Explore with 2–4 writers) · idle Modal sandboxes · cloning full data into every worker · skipping shared Volume for inputs.
+Explore before Segment · full-data every tweak · case-id tables · “win” without Ship-align · pip-first · treating Modal as required · committing PDFs or secrets · resurrecting abandoned ship_docker Modal scripts · shared mutable `solution/` across parallel writers without merge discipline.
 
 ---
 
-## Cadence
-
-| Stage | Focus | Writers |
-|-------|--------|--------:|
-| **Setup** | Forked root, uv, scorer smoke, process drill | 0–1 |
-| **Baseline** | First tagged system | 1 |
-| **Segment** | Slices, residual, harness, ceiling | 1 |
-| **Explore** | Multi-agent worktrees (default) | 2–4 |
-| **Integrate** | Merge owner | 1 |
-| **Ship-align** | Ship = measured | 1–2 |
-| **Stretch** | High-EV residuals | 2–4 |
-
----
-
-## Paste prompt
+## Paste prompt (new machine / new session)
 
 ```text
-You are Grok Build. Attack this evaluation challenge from scratch.
+You are Grok Build. Continue the MIB Doc Challenge on this machine.
 
-You are already in a clean forked challenge repo (cwd = repo root). Do not re-fork or re-clone.
-
-PROCESS: <path-to>/GROK_BUILD_PLAYBOOK.md
+PROCESS: GROK_BUILD.md (handoff section first)
 TRUTH: manuals, scorer, data, submission contract in this repo (override playbook on conflict).
+STATE: artifacts/HANDOFF.md + artifacts/SCOREBOARD.md + artifacts/AUDIT.md
 
 You are the merge owner unless the human names someone else.
-You enforce ACTIVE.md deadlines, scoreboard writes, residual-on-main, and Ship-align before any "win."
 
-STAGES: Setup → Baseline → Segment → Explore → Integrate → Ship-align → Stretch
-Serial until residual is frozen; then multi-agent Explore is the default (2–4 writers).
-One worktree only when a single high-EV slice exists — still called Explore.
+DEFAULT COMPUTE: high-CPU local/VM + Docker. Residual-first. Modal is legacy — do not use unless asked.
 
-SETUP:
-  - Prereqs: git, Python, uv, Docker if required, git-lfs if required, Modal CLI.
-  - Stay in repo root. mkdir -p solution artifacts/agency worktrees.
-  - Ensure data is present per README (no new clone).
-  - Product in solution/ with uv (uv init/add/sync/run).
-  - Local scorer smoke → artifacts/scorer_smoke/ (numeric).
-  - Process drill: dummy residual, RESIDUAL.md stub, FINDINGS skeleton, SCOREBOARD, ACTIVE.md.
-  - Modal auth + smoke; Modal for residual/full experiments (not offline product).
-  - Modal: shared Volume for inputs; Functions for bulk score; short-lived Sandboxes only for sticky shells; merge only on orchestrator.
+CURRENT PRODUCT: solution/ (integrate candidate ~108.78 residual / ~119.27 full train, cat 0).
+NEXT: bootstrap if needed → residual reconfirm → Docker full train → validation preds → Ship-align.
+THEN: Segment-2 / Stretch on integrate failures only.
 
-HARD GATES:
-  - No Explore until: artifacts/residual.json + solution/experiments/RESIDUAL.md
-    + one baseline residual scoreboard row + artifacts/ceiling/BINDING.md
-  - No "win" / ship-ready claim until Ship-align checklist passes.
-  - No full-data Modal score without residual promote for that change.
-  - Kill ACTIVE.md rows past deadline without FINDINGS+eval.
-
-LAW:
-  - uv only; no case-id answer tables; catastrophic types from scorer only.
-  - Measure; do not import a prior team’s stack.
-  - artifacts/SCOREBOARD.md only you (merge owner) append.
-  - Ship config = measured config (solution/uv.lock + same flags).
-
-START: Setup (incl. process drill) → Baseline only.
-After Segment hard exit: fan out Explore (2–4) unless only one high-EV slice.
+LAW: uv only; no case-id answer tables; catastrophic types from scorer only;
+  artifacts/SCOREBOARD.md merge-owner append only; ship config = measured config.
 ```
 
 ---
@@ -494,14 +341,8 @@ After Segment hard exit: fan out Explore (2–4) unless only one high-EV slice.
 ## One-page summary
 
 ```text
-Setup: already in clean forked repo → solution/ artifacts/ worktrees/ → uv → scorer number → process drill → Modal (Volume + Functions; short sandboxes if needed).
-Baseline: tag + scoreboard.
-Segment (hard): residual.json + RESIDUAL.md + residual score once + ceiling/BINDING.md.
-Explore (default multi-agent): ACTIVE.md, 2–4 worktrees, FINDINGS, residual A/B, kill stale.
-Integrate: you merge → residual on main → scoreboard → promote tag.
-Ship-align: required before win (Docker/offline = measured lockfile/flags).
-Stretch: high-EV only if catastrophic-safe.
-Never: re-clone the fork; Explore early; full-data thrash; pip-first; id memos; win without Ship-align.
+High-CPU box + Docker is the farm. Residual (seg-v1 n=100) gates every promote.
+solution/ is the product; scoreboard + HANDOFF carry memory across machines.
+Ship-align = offline Docker train score + val preds, same lockfile as measured.
+No Modal by default. No LLM/cloud OCR in submission. No id memorization.
 ```
-
-**Self-improving process:** agent + residual gates + multi-agent Explore + merge owner + scoreboard — not a tribal product recipe.

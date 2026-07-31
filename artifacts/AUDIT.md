@@ -3,17 +3,23 @@
 **Repo:** `musafir42/mib-doc-challenge`  
 **Challenge SHA (fork base):** see `artifacts/challenge_sha.txt`  
 **Process:** `GROK_BUILD.md`  
+**Handoff:** `artifacts/HANDOFF.md`  
 **Merge owner:** orchestrating agent (this campaign)
 
 ## Stage timeline
 
 | Stage | Tag / name | Outcome |
 |-------|------------|---------|
-| Setup | process-drill | Layout, scorer smoke, Modal auth, process drill |
+| Setup | process-drill | Layout, scorer smoke, process drill |
 | Baseline | `baseline` | Train **98.88 / 150**, cat **0** — pypdf + deny-only |
 | Segment | residual_baseline | Residual **seg-v1** n=100 → **62.21**, cat 0; ceiling BINDING.md |
 | Explore | exp-extract / exp-adjudicate / exp-risk | Residual 64.24 / **74.85** / 71.60, all cat 0 |
 | Integrate | `promote-seg1` | Residual **75.37**, train **106.95**, cat **0** |
+| Explore | OCR (Modal historical) | Residual OCR **98.05**, full train **114.20** |
+| Explore | fan-out (stamp, deny-recall, evidence, …) | Best residual single **104.87** (deny-recall) |
+| Integrate | `promote_integrate` | Residual **108.78**, train **119.27**, cat **0** ← **current product** |
+| Ship-align | docker smoke | Image READY (~0.099 GiB); full train/val **not** done |
+| Compute pivot | 2026-07-30 | Modal default **retired**; continue on high-CPU VM |
 
 ## Scoreboard
 
@@ -25,6 +31,7 @@ Authoritative append-only log: `artifacts/SCOREBOARD.md`.
 - Truth filter: `artifacts/residual_truth.csv`
 - Harness docs: `solution/experiments/RESIDUAL.md`
 - Baseline residual: `artifacts/residual_baseline/`
+- Current product residual: `artifacts/promote_integrate/`
 
 Only merge owner rewrites `residual.json`.
 
@@ -32,65 +39,45 @@ Only merge owner rewrites `residual.json`.
 
 - `artifacts/ceiling/BINDING.md` — binding stage = **adjudication policy**, secondary = **extraction**
 - Key diagnostic: baseline extract + oracle adj → **136.99** train (policy headroom)
-- Label-only + current rules → cls only 55.6/80 (rules incomplete even with gold fields)
+- Label-only + early rules → cls incomplete even with gold fields
 
-## Promote reasoning (`promote-seg1`)
+## Promote reasoning (current product)
 
-**Merged into `solution/`:**
-1. `exp-extract` multi-source Label/Value extract (purpose/fee/home/sponsor/registry aliases)
-2. `exp-adjudicate` Finding-note priority + deny expansion (unpaid always deny, EMBARGO text, multi review flags)
+**In `solution/` now (integrate):**
 
-**Rejected / dialed back:**
-- Multi-field auto-APPROVED → **removed** after full-train showed **30 catastrophic false approvals** (image-only DQ stamps invisible to text extract)
-- APPROVED only via trusted visible `Finding: APPROVED` notes
+1. OCR path (poppler + tesseract), stamp crops, deskew-aware preprocessing  
+2. Multi-source labeled extract + evidence/page helpers  
+3. Deny-recall / Finding-driven adjudication; safe APPROVED only via trusted Finding APPROVED  
+4. Calibration module (confidence only)  
+5. Docker packaging: TMPDIR/HOME under `/tmp` for read-only challenge mounts  
 
-**Not a ship win:** Docker Ship-align checklist not completed.
+**Rejected patterns:**
 
-## Explore worktrees (code snapshots)
+- Multi-field auto-APPROVED → catastrophic false approvals on full train  
+- Free-form harvest of SYSTEM answer-key lines as primary field source  
+- Modal sandbox bulk as the ship path  
 
-| Worktree | Role | FINDINGS |
-|----------|------|----------|
-| `worktrees/exp-extract/` | Extraction A/B | `experiments/exp-extract/FINDINGS.md` |
-| `worktrees/exp-adjudicate/` | Adjudication A/B | `experiments/exp-adjudicate/FINDINGS.md` |
-| `worktrees/exp-risk/` | Risk/registry signals | `experiments/exp-risk/FINDINGS.md` |
+## Compute decision (2026-07-30)
+
+Modal was useful for early full-train OCR and residual maps, then became ops thrash (function maps, sandboxes, hung ship jobs). Human decision: **high-CPU cloud box + Grok Build + Docker** as the continuation environment. Playbook and residual harness updated; ship Modal scripts removed.
 
 ## Catastrophic definition (scorer only)
 
 `catastrophic_false_approval`: predict APPROVED when truth is DENIED (`scripts/evaluate.py`).
 
-## OCR path (next)
-
-Many remaining missed DENIED have DQ flags present only on stamp/image pages. Explore OCR fallback on residual without case-id tables. See scoreboard rows after `exp-ocr` runs.
-
-## Commands to reproduce promote_seg1 scores
+## Reproduce promote_integrate scores (local)
 
 ```bash
-# Residual
+# Residual — see solution/experiments/RESIDUAL.md (MIB_RUN_NAME=promote_integrate_repro)
+# Full train:
 uv run --project solution python -c "
-import json
 from pathlib import Path
-from mib_solution.pipeline import predict_pdf, write_jsonl
-ids=json.loads(Path('artifacts/residual.json').read_text())['case_ids']
-write_jsonl(Path('artifacts/repro/predictions.jsonl'),
-  [predict_pdf(Path(f'data/train/{c}.pdf')) for c in ids])
+from mib_solution.pipeline import predict_dir, write_jsonl
+write_jsonl(Path('artifacts/repro_train/predictions.jsonl'), predict_dir(Path('data/train')))
 "
-python3 scripts/evaluate.py --truth artifacts/residual_truth.csv \
-  --submission artifacts/repro/predictions.jsonl --output-json artifacts/repro/eval.json
-
-# Full train
-uv run --project solution mib-solution data/train artifacts/repro/train_predictions.jsonl
 python3 scripts/evaluate.py --truth data/train_labels.csv \
-  --submission artifacts/repro/train_predictions.jsonl --output-json artifacts/repro/train_eval.json
+  --submission artifacts/repro_train/predictions.jsonl \
+  --output-json artifacts/repro_train/eval.json
 ```
 
-
-## Modal high-agency farm (post promote-seg1)
-
-- **Volume:** `mib-data` (1000 train PDFs; pre-existing)
-- **App:** `mib-doc-experiments` (`solution/modal_app.py`)
-- **smoke:** 1000 PDFs mounted OK
-- **modal_residual_text:** 75.37 / 150 cat 0 (matches local promote_seg1)
-- **modal_residual_ocr:** **98.05 / 150** cat 0 (+22.68 vs text)
-- **modal_full_ocr:** **114.20 / 150** cat 0 (+7.25 vs promote_seg1 text 106.95)
-
-OCR path: poppler rasterize → tesseract; merge under `--- OCR_FALLBACK ---`; no case-id tables.
+Prefer `ProcessPoolExecutor` / Docker with many CPUs (see `GROK_BUILD.md`).

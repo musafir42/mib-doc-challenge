@@ -1,0 +1,17 @@
+{
+  "run_name": "promote_integrate",
+  "action": "score-residual-ocr",
+  "git": "3497546b0ae7805005644dffb6b3875a7f7c6e97",
+  "residual_version": "seg-v1",
+  "n_case_ids": 100,
+  "n_preds": 100,
+  "n_errors": 0,
+  "errors_sample": [],
+  "primary": 108.78451555555554,
+  "extraction": 34.455555555555556,
+  "classification": 59.5,
+  "calibration": 14.828960000000002,
+  "catastrophic": 0,
+  "volume": "mib-data",
+  "command": "modal run solution/modal_app.py --action score-residual-ocr --run-name promote_integrate"
+}

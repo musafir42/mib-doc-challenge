@@ -15,3 +15,18 @@ data/validation/
 *.zip
 *.zip.sha256
 worktrees/*/.venv/
+
+# Explore worktrees: keep FINDINGS in git; do not commit full solution copies
+worktrees/*/.venv/
+worktrees/*/src/
+worktrees/*/uv.lock
+worktrees/*/modal_app.py
+worktrees/*/.python-version
+worktrees/*/Dockerfile
+worktrees/*/run.sh
+worktrees/*/pyproject.toml
+worktrees/*/README.md
+
+# Ephemeral run logs / failed farm noise
+artifacts/*_run.log
+artifacts/ship_*/

@@ -1,0 +1,59 @@
+✓ Initialized. View run at 
+https://modal.com/apps/musafir42/main/ap-qs50Ug9OxQpmFweyme3S3b
+✓ Created objects.
+├── 🔨 Created mount 
+│   /Users/noop/dev-workspace/mib-doc-challenge/solution/modal_app.py
+├── 🔨 Created mount /Users/noop/dev-workspace/mib-doc-challenge/solution/src
+├── 🔨 Created mount /Users/noop/dev-workspace/mib-doc-challenge/solution
+├── 🔨 Created function smoke.
+├── 🔨 Created function predict_text.
+├── 🔨 Created function predict_ocr.
+├── 🔨 Created function ocr_smoke.
+├── 🔨 Created function predict_docker.
+└── 🔨 Created function docker_smoke.
+scoring residual n=100 WITH OCR via Modal…
+Score version: mib_weighted_v1
+Cases: 100
+Submitted records: 100
+Scored predictions: 100
+Missing cases: 0
+Extra cases: 0
+Duplicate case ids: 0
+Invalid adjudication records: 0
+Invalid confidence records: 0
+Invalid fee_status records: 0
+Field extraction: 34.46 / 50
+Classification: 59.50 / 80
+Calibration: 14.83 / 20
+Missing-case penalty: -0.00 / 10
+Deterministic score: 108.78 / 150
+Catastrophic false approvals: 0
+Mean confidence Brier: 0.1293
+Confusion:
+  APPROVED->APPROVED: 11
+  APPROVED->NEEDS_REVIEW: 17
+  DENIED->DENIED: 36
+  DENIED->NEEDS_REVIEW: 16
+  NEEDS_REVIEW->DENIED: 1
+  NEEDS_REVIEW->NEEDS_REVIEW: 19
+{
+  "run_name": "promote_integrate",
+  "action": "score-residual-ocr",
+  "git": "3497546b0ae7805005644dffb6b3875a7f7c6e97",
+  "residual_version": "seg-v1",
+  "n_case_ids": 100,
+  "n_preds": 100,
+  "n_errors": 0,
+  "errors_sample": [],
+  "primary": 108.78451555555554,
+  "extraction": 34.455555555555556,
+  "classification": 59.5,
+  "calibration": 14.828960000000002,
+  "catastrophic": 0,
+  "volume": "mib-data",
+  "command": "modal run solution/modal_app.py --action score-residual-ocr 
+--run-name promote_integrate"
+}
+Stopping app - local entrypoint completed.
+✓ App completed. View run at 
+https://modal.com/apps/musafir42/main/ap-qs50Ug9OxQpmFweyme3S3b

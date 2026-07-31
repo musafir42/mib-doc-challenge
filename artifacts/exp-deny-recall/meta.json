@@ -1,0 +1,17 @@
+{
+  "run_name": "exp-deny-recall",
+  "action": "score-residual-ocr",
+  "git": "3497546b0ae7805005644dffb6b3875a7f7c6e97",
+  "residual_version": "seg-v1",
+  "n_case_ids": 100,
+  "n_preds": 100,
+  "n_errors": 0,
+  "errors_sample": [],
+  "primary": 104.86584444444445,
+  "extraction": 30.844444444444445,
+  "classification": 58.9,
+  "calibration": 15.121400000000003,
+  "catastrophic": 0,
+  "volume": "mib-data",
+  "command": "modal run solution/modal_app.py --action score-residual-ocr --run-name exp-deny-recall"
+}

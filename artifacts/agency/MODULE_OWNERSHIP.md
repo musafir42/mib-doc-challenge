@@ -1,9 +1,20 @@
-# Explore module ownership (seg-v1 fan-out)
+# Module ownership (Explore)
 
-| experiment | may edit | must not edit |
-|------------|----------|---------------|
-| exp-extract | worktrees/exp-extract/src/mib_solution/extract.py (and tiny pipeline glue if needed) | adjudicate.py primary logic; residual.json; solution/ |
-| exp-adjudicate | worktrees/exp-adjudicate/src/mib_solution/adjudicate.py | extract.py; residual.json; solution/ |
-| exp-risk | worktrees/exp-risk/src/mib_solution/extract.py (risk/registry only) + adjudicate.py if needed for mapped flags | residual.json; solution/; do not fight exp-extract on name/purpose parsers — focus risk |
+When fanning out experiments, assign non-overlapping edit scopes.
 
-Merge only on orchestrator after residual A/B.
+| Area | Paths | Notes |
+|------|-------|--------|
+| OCR preprocess | `solution/src/mib_solution/ocr.py` | deskew, stamp crops, PSM, red channel |
+| Extract / evidence | `extract.py`, `evidence.py` | labeled fields, page roles, trusted text |
+| Adjudicate | `adjudicate.py` | deny/approve/review policy only |
+| Calibrate | `calibrate.py`, thin `pipeline.py` hooks | conf only; do not change labels |
+| Packaging | `Dockerfile`, `run.sh`, `.dockerignore` | Ship-align only |
+
+## Residual bar (current)
+
+Beat **`promote_integrate` residual ~108.78 cat 0** (or document why a lower residual is acceptable for private robustness).
+
+Score residual with local multi-process (see `solution/experiments/RESIDUAL.md`).  
+Modal is **not** required.
+
+Merge owner integrates after residual A/B on main.
