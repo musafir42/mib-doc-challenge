@@ -1,0 +1,32 @@
+{
+  "run_name": "lat-select-ocr",
+  "stage": "Explore",
+  "slice": "residual_seg-v1",
+  "residual_version": "seg-v1",
+  "n": 100,
+  "workers": 2,
+  "OMP_THREAD_LIMIT": 1,
+  "primary": 108.89191111111111,
+  "extraction": 34.11111111111111,
+  "classification": 60.099999999999994,
+  "calibration": 14.680800000000001,
+  "catastrophic": 0,
+  "wall_seconds": 2171.2385433960003,
+  "s_per_pdf": 21.71238543396,
+  "should_ocr_rate_residual": 0.86,
+  "should_ocr_rate_train50": 0.42,
+  "should_ocr_rate_train200": 0.42,
+  "timing20": {
+    "s_per_pdf_wall_workers2": 6.549718106849968,
+    "ocr_rate": 0.4,
+    "skip_rate": 0.6,
+    "meets_6s": false
+  },
+  "bars": {
+    "residual_reconfirm_cv2": 104.7367511111111,
+    "residual_reconfirm_nocv2": 104.45281777777777,
+    "promote_integrate": 108.78451555555554
+  },
+  "skip_residual_wrong_adj": 8,
+  "notes": "Smarter should_ocr: skip rich text+trusted adj; OCR thin/incomplete. Residual 108.89 cat0 beats cv2 reconfirm 104.74 and matches/beats promote 108.78."
+}

@@ -1,0 +1,93 @@
+=== lat-dpi start 2026-07-31T02:17:44+00:00 load=10.48 9.76 11.04 ===
+=== microbench lean vs fat (serial ocr_pdf_text) ===
+microbench ids: ['MIB-000074', 'MIB-000226', 'MIB-000293', 'MIB-000479', 'MIB-000718']
+
+=== LEAN defaults dpi=200 max_pages=4 ===
+  lean_200_4 MIB-000074: 42.91s chars=11196
+  lean_200_4 MIB-000226: 34.44s chars=7254
+  lean_200_4 MIB-000293: 37.20s chars=7440
+  lean_200_4 MIB-000479: 31.73s chars=6164
+  lean_200_4 MIB-000718: 33.50s chars=5226
+
+=== FAT env dpi=275 max_pages=6 ===
+  fat_275_6 MIB-000074: 69.70s chars=16020
+  fat_275_6 MIB-000226: 81.79s chars=13452
+  fat_275_6 MIB-000293: 44.61s chars=8386
+  fat_275_6 MIB-000479: 42.25s chars=7639
+  fat_275_6 MIB-000718: 45.02s chars=5376
+
+SUMMARY lean_mean=35.96s fat_mean=56.67s fat/lean=1.576
+=== residual n=100 workers=2 ===
+n=100 workers=2 OMP=1
+  10/100 last=MIB-000573 35.0s elapsed=210.6s
+  20/100 last=MIB-000398 37.5s elapsed=389.3s
+  30/100 last=MIB-000752 43.9s elapsed=546.1s
+  40/100 last=MIB-000747 49.4s elapsed=686.8s
+  50/100 last=MIB-000533 38.8s elapsed=867.9s
+  60/100 last=MIB-000945 40.1s elapsed=1034.9s
+  70/100 last=MIB-000002 0.1s elapsed=1168.3s
+  80/100 last=MIB-000036 52.7s elapsed=1278.4s
+  90/100 last=MIB-000079 36.8s elapsed=1428.0s
+  100/100 last=MIB-000066 24.5s elapsed=1534.2s
+{
+  "run_name": "lat-dpi",
+  "hypothesis": "Lower OCR cost via dpi=200 max_pages=4 defaults (env overrides kept) protects residual primary (\u2265104.45 target) with cat 0",
+  "n": 100,
+  "workers": 2,
+  "OMP_THREAD_LIMIT": "1",
+  "OMP_NUM_THREADS": "1",
+  "defaults": {
+    "dpi": 200,
+    "max_pages": 4
+  },
+  "env_overrides": [
+    "MIB_OCR_DPI",
+    "MIB_OCR_MAX_PAGES",
+    "MIB_OCR_BINARIZE"
+  ],
+  "wall_sec": 1534.2249365179996,
+  "s_per_pdf_wall": 15.342249365179995,
+  "mean_per_pdf_sec": 30.677739720490035,
+  "median_per_pdf_sec": 36.856545267,
+  "load_note": "may be contended by peer lat-* residual runs",
+  "baseline_compare": {
+    "residual_reconfirm_no_cv2": 104.45,
+    "residual_reconfirm_cv2": 104.74,
+    "promote_integrate": 108.78
+  }
+}
+DONE wrote 100 -> /root/dev-workspace/mib-doc-challenge/artifacts/lat-dpi/predictions.jsonl
+Score version: mib_weighted_v1
+Cases: 100
+Submitted records: 100
+Scored predictions: 100
+Missing cases: 0
+Extra cases: 0
+Duplicate case ids: 0
+Invalid adjudication records: 0
+Invalid confidence records: 0
+Invalid fee_status records: 0
+Field extraction: 31.80 / 50
+Classification: 57.70 / 80
+Calibration: 14.64 / 20
+Missing-case penalty: -0.00 / 10
+Deterministic score: 104.14 / 150
+Catastrophic false approvals: 0
+Mean confidence Brier: 0.1339
+Confusion:
+  APPROVED->APPROVED: 11
+  APPROVED->NEEDS_REVIEW: 17
+  DENIED->DENIED: 33
+  DENIED->NEEDS_REVIEW: 19
+  NEEDS_REVIEW->DENIED: 1
+  NEEDS_REVIEW->NEEDS_REVIEW: 19
+PRIMARY 104.14484
+CAT 0
+{
+  "calibration_score": 14.644840000000002,
+  "classification_score": 57.699999999999996,
+  "extraction_score": 31.8,
+  "missing_penalty": 0.0,
+  "total_score": 104.14484
+}
+=== lat-dpi end 2026-07-31T02:51:03+00:00 load=16.07 15.77 14.84 ===

@@ -1,0 +1,53 @@
+{
+  "name": "lat-parallel-ship",
+  "date": "2026-07-31T02:51:14.169435+00:00",
+  "goal": "ProcessPool predict_dir + OMP=1 + MIB_WORKERS=4 ship packaging",
+  "residual": {
+    "primary": 104.7367511111111,
+    "catastrophic": 0,
+    "workers": 2,
+    "wall_sec": 1917.194985257,
+    "s_per_pdf_wall": 19.171949852570002,
+    "baseline_residual_reconfirm_cv2": 104.7367511111111,
+    "delta_vs_cv2": 0.0,
+    "parity": true
+  },
+  "timing20": {
+    "run": "lat-parallel-ship timing 20 train PDFs",
+    "n": 20,
+    "workers": 4,
+    "OMP_THREAD_LIMIT": "1",
+    "wall_sec": 173.3668716229995,
+    "s_per_pdf_wall": 8.668343581149974,
+    "case_ids": [
+      "MIB-000026",
+      "MIB-000031",
+      "MIB-000033",
+      "MIB-000090",
+      "MIB-000096",
+      "MIB-000105",
+      "MIB-000115",
+      "MIB-000143",
+      "MIB-000229",
+      "MIB-000251",
+      "MIB-000282",
+      "MIB-000433",
+      "MIB-000559",
+      "MIB-000605",
+      "MIB-000655",
+      "MIB-000693",
+      "MIB-000755",
+      "MIB-000759",
+      "MIB-000760",
+      "MIB-000914"
+    ],
+    "target_s_per_pdf": 6.0,
+    "meets_6s": false
+  },
+  "notes": [
+    "OCR algorithm unchanged; parallel packaging only",
+    "default_workers = min(4, cpu_count); override MIB_WORKERS",
+    "run.sh exports OMP_THREAD_LIMIT=1 OMP_NUM_THREADS=1 MIB_WORKERS=4",
+    "timing under multi-agent box contention; residual_cv2 alone was 4.08s/PDF @8 workers"
+  ]
+}

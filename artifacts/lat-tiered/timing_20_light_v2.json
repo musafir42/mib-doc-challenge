@@ -1,0 +1,115 @@
+{
+  "n": 20,
+  "workers": 2,
+  "MIB_OCR_TIER": "light",
+  "wall_s": 11.44,
+  "avg_s": 1.052,
+  "p50_s": 1.59,
+  "tier_counts": {
+    "none": 10,
+    "light": 10
+  },
+  "pct_heavy": 0.0,
+  "rows": [
+    {
+      "case_id": "MIB-000039",
+      "tier": "light",
+      "sec": 2.104
+    },
+    {
+      "case_id": "MIB-000050",
+      "tier": "none",
+      "sec": 0.057
+    },
+    {
+      "case_id": "MIB-000060",
+      "tier": "none",
+      "sec": 0.051
+    },
+    {
+      "case_id": "MIB-000075",
+      "tier": "none",
+      "sec": 0.039
+    },
+    {
+      "case_id": "MIB-000089",
+      "tier": "none",
+      "sec": 0.015
+    },
+    {
+      "case_id": "MIB-000097",
+      "tier": "light",
+      "sec": 2.719
+    },
+    {
+      "case_id": "MIB-000155",
+      "tier": "none",
+      "sec": 0.058
+    },
+    {
+      "case_id": "MIB-000220",
+      "tier": "light",
+      "sec": 1.687
+    },
+    {
+      "case_id": "MIB-000332",
+      "tier": "none",
+      "sec": 0.047
+    },
+    {
+      "case_id": "MIB-000375",
+      "tier": "none",
+      "sec": 0.058
+    },
+    {
+      "case_id": "MIB-000405",
+      "tier": "none",
+      "sec": 0.045
+    },
+    {
+      "case_id": "MIB-000429",
+      "tier": "light",
+      "sec": 1.809
+    },
+    {
+      "case_id": "MIB-000445",
+      "tier": "light",
+      "sec": 1.834
+    },
+    {
+      "case_id": "MIB-000520",
+      "tier": "light",
+      "sec": 3.158
+    },
+    {
+      "case_id": "MIB-000549",
+      "tier": "light",
+      "sec": 1.871
+    },
+    {
+      "case_id": "MIB-000597",
+      "tier": "light",
+      "sec": 1.59
+    },
+    {
+      "case_id": "MIB-000667",
+      "tier": "none",
+      "sec": 0.036
+    },
+    {
+      "case_id": "MIB-000841",
+      "tier": "light",
+      "sec": 1.867
+    },
+    {
+      "case_id": "MIB-000932",
+      "tier": "light",
+      "sec": 1.964
+    },
+    {
+      "case_id": "MIB-000971",
+      "tier": "none",
+      "sec": 0.025
+    }
+  ]
+}

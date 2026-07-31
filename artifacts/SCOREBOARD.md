@@ -39,8 +39,22 @@ Scale is always **/150**. Residual = hard subset (seg-v1 n=100), not a different
 | 2026-07-30 | promote_integrate | Integrate | residual_seg-v1 | **108.78** | 0 | merged Explore winners into solution/; current product | artifacts/promote_integrate/ | main |
 | 2026-07-30 | promote_integrate_full | Integrate | train_full | **119.27** | 0 | full train after integrate; cat 0 | artifacts/promote_integrate_full/ | main |
 | 2026-07-30 | docker_ship_smoke | Ship-align | smoke10 | 132.13* | 0 | Docker READY; *smoke only, not full-train comparable | artifacts/docker_ship/ | main |
+| 2026-07-31 | residual_reconfirm | Integrate | residual_seg-v1 | **104.45** | 0 | Host n=100, MIB_WORKERS=8, OMP=1, wall ~314s; **below** promote 108.78 — cv2/numpy missing from pyproject (deskew/CLAHE/binarize no-op); tesseract 4.1.1 | artifacts/residual_reconfirm/ | 2aafd12 |
+| 2026-07-31 | residual_reconfirm_cv2 | Integrate | residual_seg-v1 | **104.74** | 0 | After uv add opencv-python-headless+numpy; wall ~408s W=8 OMP=1; still ≪108.78 — host tesseract **4.1.1** vs Modal/Docker tess5 likely; latency Explore fan-out ACTIVE | artifacts/residual_reconfirm_cv2/ | 2aafd12 |
+| 2026-07-31 | lat-parallel-ship | Explore | residual_seg-v1 | **104.74** | 0 | ProcessPool predict_dir + OMP=1 + MIB_WORKERS=4 in run.sh; **quality parity** with residual_cv2 — ship packaging YES | artifacts/lat-parallel-ship/ | explore |
+| 2026-07-31 | lat-dpi | Explore | residual_seg-v1 | **104.14** | 0 | dpi 200 / max_pages 4 defaults; −0.60 vs cv2; microbench ~1.58× faster OCR vs 275/6; latency candidate | artifacts/lat-dpi/ | explore |
+| 2026-07-31 | lat-psm-lite | Explore | residual_seg-v1 | **102.29** | 0 | full+crop psm 6 only; −29% OCR time; residual **below** 104.45 floor — NO solo promote | artifacts/lat-psm-lite/ | explore |
+| 2026-07-31 | lat-tiered | Explore | residual_seg-v1 | **100.38** | 0 | auto light/heavy final; residual ≥100 cat0 but −4.4 vs cv2 — conditional only | artifacts/lat-tiered/ | explore |
+| 2026-07-31 | lat-crops-lite | Explore | residual_seg-v1 | **103.96** | 0 | 3-band crops no adaptive; ~31% faster OCR; below floor — NO solo | artifacts/lat-crops-lite/ | explore |
+| 2026-07-31 | lat-select-ocr | Explore | residual_seg-v1 | **108.89** | 0 | smarter should_ocr; residual OCR 86% / train skip ~58%; **best residual**; latency YES | artifacts/lat-select-ocr/ | explore |
+| 2026-07-31 | promote_lat_ship | Integrate | residual_seg-v1 | **108.20** | 0 | merge select-ocr+parallel ship+dpi200/4+opencv; residual wall ~301s@8; train40 **2.67 s/PDF @4 workers** (ocr~40%) under 6s budget | artifacts/promote_lat_ship/ | 2aafd12 |
 
 ## Campaign note (2026-07-30)
 
 - **Default compute going forward:** high-CPU cloud VM + local Docker / multi-process. Modal farm retired as default (see `artifacts/HANDOFF.md`, `GROK_BUILD.md`).
 - **Next scoreboard rows expected:** residual reconfirm on new box; Docker full train; validation package.
+
+## Campaign note (2026-07-31)
+
+- Residual reconfirm on Vultr box: **104.45 / 150 cat 0** (not ~108.78). Root cause: `opencv-python` / `numpy` never declared in `solution/pyproject.toml`; `ocr.py` optional imports fail → weak OCR path. Docker image also lacks OpenCV. Ship path must add deps **or** accept lower score; also must meet **6 s/PDF @ 4 vCPU**.
+- Prior thrash: 8 workers × multi-thread tesseract (no `OMP_THREAD_LIMIT=1`) made single OCR calls take minutes; fixed for reconfirm.

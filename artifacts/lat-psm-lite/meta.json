@@ -1,0 +1,18 @@
+{
+  "run": "lat-psm-lite",
+  "residual_version": "seg-v1",
+  "git_sha": "2aafd12",
+  "MIB_WORKERS": 2,
+  "OMP_THREAD_LIMIT": 1,
+  "OMP_NUM_THREADS": 1,
+  "MIB_OCR_FULL_PSM": "6",
+  "MIB_OCR_CROP_PSM": "6",
+  "MIB_OCR_BINARIZE": "1",
+  "primary_total": 102.28681777777777,
+  "catastrophic": 0,
+  "wall_s": 1422.4324958259995,
+  "mean_case_s": 28.26026858360996,
+  "s_per_pdf_wall": 14.224324958259995,
+  "command": "uv run python artifacts/lat-psm-lite/run_residual.py; scripts/evaluate.py",
+  "baseline_cv2_total": 104.7367511111111
+}

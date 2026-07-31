@@ -1,0 +1,18 @@
+{
+  "run": "lat-tiered-light",
+  "MIB_OCR_TIER": "light",
+  "n": 100,
+  "workers": 2,
+  "OMP_THREAD_LIMIT": 1,
+  "wall_s": 88.78,
+  "avg_s": 1.752,
+  "p50_s": 2.129,
+  "p95_s": 2.927,
+  "tier_counts": {
+    "light": 76,
+    "none": 24
+  },
+  "pct_heavy": 0.0,
+  "pct_light": 76.0,
+  "pct_none": 24.0
+}

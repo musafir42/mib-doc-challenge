@@ -1,0 +1,12 @@
+residual_cv2 n=100 workers=8
+  10/100 last=MIB-000573 30.3s elapsed=62.8s
+  20/100 last=MIB-000383 0.0s elapsed=96.9s
+  30/100 last=MIB-000717 0.0s elapsed=128.2s
+  40/100 last=MIB-000134 67.2s elapsed=170.3s
+  50/100 last=MIB-000536 36.5s elapsed=225.2s
+  60/100 last=MIB-000344 0.0s elapsed=264.8s
+  70/100 last=MIB-000034 0.0s elapsed=296.2s
+  80/100 last=MIB-000030 51.1s elapsed=340.2s
+  90/100 last=MIB-000057 35.8s elapsed=363.2s
+  100/100 last=MIB-000013 54.9s elapsed=407.5s
+DONE n=100 wall=407.7s

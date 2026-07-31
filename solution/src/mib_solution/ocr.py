@@ -12,6 +12,7 @@ Builds on exp-deskew (residual 101.70 cat 0) and exp-stamp-ocr (100.90):
 from __future__ import annotations
 
 import os
+import re
 from pathlib import Path
 from typing import Any
 
@@ -365,8 +366,11 @@ def _merge_unique_texts(chunks: list[str]) -> str:
     return "\n".join(kept)
 
 
-def ocr_pdf_text(pdf_path: Path, dpi: int = 275, max_pages: int = 6) -> str:
-    """Rasterize, stronger-deskew, OCR full page + CLAHE/binary stamp crops."""
+def ocr_pdf_text(pdf_path: Path, dpi: int = 200, max_pages: int = 4) -> str:
+    """Rasterize, stronger-deskew, OCR full page + CLAHE/binary stamp crops.
+
+    Ship-leaner defaults (dpi=200, max_pages=4). Override: MIB_OCR_DPI / MIB_OCR_MAX_PAGES.
+    """
     if not ocr_available():
         return ""
     path = Path(pdf_path)
@@ -443,28 +447,169 @@ def ocr_pdf_text(pdf_path: Path, dpi: int = 275, max_pages: int = 6) -> str:
     return "\n".join(page_parts)
 
 
+# ---------------------------------------------------------------------------
+# Selective OCR gate (latency ship)
+# ---------------------------------------------------------------------------
+# Skip heavy OCR only when the text layer is already rich enough for extract
+# AND carries trusted adjudication signals (or is an ultra-complete form).
+# Thin / scanned / residual-like incomplete packets still OCR.
+
+_CASE_RE = re.compile(r"\bMIB-\d{6}\b", re.IGNORECASE)
+_SPN_RE = re.compile(r"\bSPN-\d{4}\b", re.IGNORECASE)
+_VISA_RE = re.compile(r"\b(XW-1|XW-2|DIP-1|MED-3|TRANSIT-7)\b", re.IGNORECASE)
+_DATE_RE = re.compile(r"\b20\d{2}-\d{2}-\d{2}\b")
+_SPECIES_LABEL_RE = re.compile(
+    r"Species Code\s*(?:\n|:)\s*[A-Z0-9_]", re.IGNORECASE
+)
+_HOME_LABEL_RE = re.compile(r"Home World\s*(?:\n|:)\s*\S", re.IGNORECASE)
+_FEE_LABEL_RE = re.compile(r"(?:Fee Status|Waiver Code)\s*(?:\n|:)", re.IGNORECASE)
+_PURPOSE_LABEL_RE = re.compile(
+    r"Declared Purpose\s*(?:\n|:)\s*\S", re.IGNORECASE
+)
+_APPLICANT_LABEL_RE = re.compile(
+    r"(?:Applicant(?:\s+Name)?|Registry Name|Full Name)\s*(?:\n|:)\s*[A-Za-z]",
+    re.IGNORECASE,
+)
+# Align with adjudicate Finding tolerance (stamp OCR variants).
+_FINDING_RE = re.compile(
+    r"(?:Finding|Findigg|Fouing|Fearg|Pearg|Frdirg|Feging|Findey|Findng|"
+    r"Finis|Finsiege|F[il1]nd[il1]?[nhg]g?)"
+    r"\s*[:.\-]?\s*"
+    r"(APPROVED|DENIED|NEEDS_REVIEW|DENED|DEMED|DENIER|DENY)\b",
+    re.IGNORECASE,
+)
+_DQ_RE = re.compile(
+    r"biohazard(?:_red)?|planetary[_\s\-]?embargo|active[_\s\-]?warrant|"
+    r"memory[_\s\-]?tamper|\bEMBARGO\s+REVIEW\b|\bembargo\b|\bwarrant\b|\btamper",
+    re.IGNORECASE,
+)
+_RISK_LINE_RE = re.compile(
+    r"(?:Risk Flags?|Observed flags)\s*(?:\n|:)\s*\S", re.IGNORECASE
+)
+_MANUAL_RE = re.compile(
+    r"Manual (?:Adjudicator Notes|correction)", re.IGNORECASE
+)
+
+# Char floor: residual median ~390; below this always OCR.
+_OCR_MIN_CHARS = 400
+# Structure = count of field/label probes present in the text layer.
+_OCR_MIN_STRUCT = 5
+
+
+def _text_layer_structure(text: str) -> dict[str, bool | int]:
+    """Probe text-layer richness without full extract (cheap)."""
+    t = text or ""
+    flags = {
+        "case": bool(_CASE_RE.search(t)),
+        "spn": bool(_SPN_RE.search(t)),
+        "visa": bool(_VISA_RE.search(t)),
+        "date": bool(_DATE_RE.search(t)),
+        "species": bool(_SPECIES_LABEL_RE.search(t)),
+        "home": bool(_HOME_LABEL_RE.search(t)),
+        "fee": bool(_FEE_LABEL_RE.search(t)),
+        "purpose": bool(_PURPOSE_LABEL_RE.search(t)),
+        "applicant": bool(_APPLICANT_LABEL_RE.search(t)),
+    }
+    return {
+        **flags,
+        "struct": sum(1 for v in flags.values() if v),
+        "finding": bool(_FINDING_RE.search(t)),
+        "dq": bool(_DQ_RE.search(t)),
+        "risk_line": bool(_RISK_LINE_RE.search(t)),
+        "manual": bool(_MANUAL_RE.search(t)),
+        "n": len(t.strip()),
+    }
+
+
 def should_ocr(text_layer: str, force: bool = False) -> bool:
-    """Decide whether OCR is worth the cost."""
+    """Decide whether heavy OCR is worth the cost.
+
+    Returns True (run OCR) for thin, incomplete, or residual-like packets.
+    Returns False (skip OCR) only when the text layer is rich AND either:
+      - already has trusted adjudication signals (Finding / DQ tokens), or
+      - is an ultra-complete form (most field labels + risk/fee surface).
+    """
     if force:
         return True
-    if os.environ.get("MIB_FORCE_OCR", "").strip() in {"1", "true", "yes"}:
+    env = os.environ.get("MIB_FORCE_OCR", "").strip().lower()
+    if env in {"1", "true", "yes"}:
         return True
-    t = text_layer or ""
-    if len(t.strip()) < 120:
+    # Escape hatch for pure text-layer A/B (not used in ship).
+    if os.environ.get("MIB_SKIP_OCR", "").strip().lower() in {"1", "true", "yes"}:
+        return False
+
+    f = _text_layer_structure(text_layer or "")
+    n = int(f["n"])
+    s = int(f["struct"])
+
+    # Thin / near-empty text layer → always OCR (scanned packets).
+    if n < _OCR_MIN_CHARS:
         return True
-    lower = t.casefold()
-    risk_tokens = (
-        "biohazard",
-        "embargo",
-        "warrant",
-        "tamper",
-        "finding:",
-        "risk flag",
-        "observed flags",
+    if s < _OCR_MIN_STRUCT:
+        return True
+
+    has_spn = bool(f["spn"])
+    has_visa = bool(f["visa"])
+    has_date = bool(f["date"])
+    has_species = bool(f["species"])
+    has_home = bool(f["home"])
+    has_fee = bool(f["fee"])
+    has_purpose = bool(f["purpose"])
+    has_finding = bool(f["finding"])
+    has_dq = bool(f["dq"])
+    has_risk_line = bool(f["risk_line"])
+    has_manual = bool(f["manual"])
+
+    # Residual-like: several core fields missing from text → OCR stamps/pages.
+    core_miss = sum(
+        (not has_spn, not has_visa, not has_date, not has_species, not has_home)
     )
-    if not any(tok in lower for tok in risk_tokens):
+    if core_miss >= 3:
         return True
-    return False
+    if not has_spn or not has_visa:
+        return True
+    # Incomplete structure without any trusted adj signal → OCR.
+    if s < 6 and not has_finding and not has_dq:
+        return True
+
+    # Trusted adjudication already in text layer → skip OCR when structure solid.
+    if has_finding and s >= 6 and has_spn and has_visa and n >= 500:
+        return False
+    if has_finding and s >= 7 and n >= 450:
+        return False
+    if has_dq and s >= 6 and has_spn and has_visa and n >= 500:
+        return False
+    if has_dq and has_finding and s >= 5 and n >= 450:
+        return False
+
+    # Ultra-rich complete form: extract works; adj can use risk/fee/purpose surface.
+    if (
+        s >= 8
+        and n >= 650
+        and has_spn
+        and has_visa
+        and has_date
+        and has_species
+        and has_home
+        and (has_risk_line or has_fee or has_purpose)
+    ):
+        return False
+    if s >= 9 and n >= 600 and has_spn and has_visa and has_date:
+        return False
+
+    # Manual notes + risk line on a rich packet → text path sufficient.
+    if (
+        has_manual
+        and has_risk_line
+        and s >= 7
+        and n >= 600
+        and has_spn
+        and has_visa
+    ):
+        return False
+
+    # Default: OCR (protect residual stamp / incomplete extract cases).
+    return True
 
 
 def merge_text_layers(text_layer: str, ocr_text: str) -> str:

@@ -1,0 +1,116 @@
+{
+  "n": 20,
+  "workers": 2,
+  "MIB_OCR_TIER": "auto",
+  "wall_s": 38.26,
+  "avg_s": 3.633,
+  "p50_s": 1.727,
+  "tier_counts": {
+    "none": 10,
+    "light": 8,
+    "heavy": 2
+  },
+  "pct_heavy": 10.0,
+  "rows": [
+    {
+      "case_id": "MIB-000039",
+      "tier": "heavy",
+      "sec": 30.129
+    },
+    {
+      "case_id": "MIB-000050",
+      "tier": "none",
+      "sec": 0.057
+    },
+    {
+      "case_id": "MIB-000060",
+      "tier": "none",
+      "sec": 0.044
+    },
+    {
+      "case_id": "MIB-000075",
+      "tier": "none",
+      "sec": 0.039
+    },
+    {
+      "case_id": "MIB-000089",
+      "tier": "none",
+      "sec": 0.014
+    },
+    {
+      "case_id": "MIB-000097",
+      "tier": "light",
+      "sec": 2.773
+    },
+    {
+      "case_id": "MIB-000155",
+      "tier": "none",
+      "sec": 0.058
+    },
+    {
+      "case_id": "MIB-000220",
+      "tier": "heavy",
+      "sec": 24.942
+    },
+    {
+      "case_id": "MIB-000332",
+      "tier": "none",
+      "sec": 0.046
+    },
+    {
+      "case_id": "MIB-000375",
+      "tier": "none",
+      "sec": 0.058
+    },
+    {
+      "case_id": "MIB-000405",
+      "tier": "none",
+      "sec": 0.039
+    },
+    {
+      "case_id": "MIB-000429",
+      "tier": "light",
+      "sec": 1.846
+    },
+    {
+      "case_id": "MIB-000445",
+      "tier": "light",
+      "sec": 1.839
+    },
+    {
+      "case_id": "MIB-000520",
+      "tier": "light",
+      "sec": 3.154
+    },
+    {
+      "case_id": "MIB-000549",
+      "tier": "light",
+      "sec": 1.889
+    },
+    {
+      "case_id": "MIB-000597",
+      "tier": "light",
+      "sec": 1.727
+    },
+    {
+      "case_id": "MIB-000667",
+      "tier": "none",
+      "sec": 0.035
+    },
+    {
+      "case_id": "MIB-000841",
+      "tier": "light",
+      "sec": 1.939
+    },
+    {
+      "case_id": "MIB-000932",
+      "tier": "light",
+      "sec": 2.007
+    },
+    {
+      "case_id": "MIB-000971",
+      "tier": "none",
+      "sec": 0.025
+    }
+  ]
+}

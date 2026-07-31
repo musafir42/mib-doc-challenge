@@ -1,0 +1,23 @@
+[
+  {
+    "pdf": "MIB-000332.pdf",
+    "light_s": 2.58,
+    "heavy_s": 27.89,
+    "light_chars": 1046,
+    "heavy_chars": 7375
+  },
+  {
+    "pdf": "MIB-000971.pdf",
+    "light_s": 2.13,
+    "heavy_s": 37.17,
+    "light_chars": 708,
+    "heavy_chars": 9470
+  },
+  {
+    "pdf": "MIB-000155.pdf",
+    "light_s": 1.97,
+    "heavy_s": 38.89,
+    "light_chars": 600,
+    "heavy_chars": 4265
+  }
+]

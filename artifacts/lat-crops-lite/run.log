@@ -1,0 +1,40 @@
+start 2026-07-31T02:31:31+00:00 load=14.27 14.10 12.75 15/465 74987 workers=2
+residual_crops_lite n=100 workers=2
+  10/100 last=MIB-000573 25.2s elapsed=174.5s
+  20/100 last=MIB-000398 31.4s elapsed=308.3s
+  30/100 last=MIB-000752 47.2s elapsed=445.8s
+  40/100 last=MIB-000747 49.3s elapsed=574.7s
+  50/100 last=MIB-000536 27.5s elapsed=712.7s
+  60/100 last=MIB-000945 31.3s elapsed=871.7s
+  70/100 last=MIB-000002 0.1s elapsed=968.1s
+  80/100 last=MIB-000036 42.7s elapsed=1045.8s
+  90/100 last=MIB-000058 39.1s elapsed=1163.7s
+  100/100 last=MIB-000066 14.8s elapsed=1226.1s
+DONE n=100 wall=1226.1s mean_pdf=24.46s
+eval 2026-07-31T02:51:57+00:00
+Score version: mib_weighted_v1
+Cases: 100
+Submitted records: 100
+Scored predictions: 100
+Missing cases: 0
+Extra cases: 0
+Duplicate case ids: 0
+Invalid adjudication records: 0
+Invalid confidence records: 0
+Invalid fee_status records: 0
+Field extraction: 31.71 / 50
+Classification: 57.70 / 80
+Calibration: 14.55 / 20
+Missing-case penalty: -0.00 / 10
+Deterministic score: 103.96 / 150
+Catastrophic false approvals: 0
+Mean confidence Brier: 0.1362
+Confusion:
+  APPROVED->APPROVED: 11
+  APPROVED->NEEDS_REVIEW: 17
+  DENIED->DENIED: 33
+  DENIED->NEEDS_REVIEW: 19
+  NEEDS_REVIEW->DENIED: 1
+  NEEDS_REVIEW->NEEDS_REVIEW: 19
+PRIMARY 103.9637911111111 CAT 0
+finish 2026-07-31T02:51:57+00:00 load=11.02 14.36 14.41 5/375 106716

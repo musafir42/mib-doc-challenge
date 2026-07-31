@@ -1,0 +1,12 @@
+lat-psm-lite residual n=100 workers=2 OMP=1 FULL_PSM=6 CROP_PSM=6 BINARIZE=1
+  10/100 last=MIB-000573 30.6s elapsed=186.6s mean_case=35.8s
+  20/100 last=MIB-000398 31.6s elapsed=342.3s mean_case=33.5s
+  30/100 last=MIB-000752 52.5s elapsed=492.8s mean_case=31.6s
+  40/100 last=MIB-000747 54.6s elapsed=630.3s mean_case=31.0s
+  50/100 last=MIB-000536 30.4s elapsed=778.8s mean_case=30.5s
+  60/100 last=MIB-000945 36.8s elapsed=959.0s mean_case=31.5s
+  70/100 last=MIB-000002 0.1s elapsed=1071.1s mean_case=30.2s
+  80/100 last=MIB-000036 49.0s elapsed=1165.6s mean_case=29.0s
+  90/100 last=MIB-000058 52.9s elapsed=1312.3s mean_case=29.0s
+  100/100 last=MIB-000066 26.0s elapsed=1422.4s mean_case=28.3s
+DONE n=100 wall=1422.4s mean_case=28.3s

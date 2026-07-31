@@ -1,20 +1,22 @@
-# Module ownership (Explore)
+# Module ownership (latency ship Explore)
 
-When fanning out experiments, assign non-overlapping edit scopes.
+Non-overlapping edit scopes for concurrent worktrees.
 
-| Area | Paths | Notes |
-|------|-------|--------|
-| OCR preprocess | `solution/src/mib_solution/ocr.py` | deskew, stamp crops, PSM, red channel |
-| Extract / evidence | `extract.py`, `evidence.py` | labeled fields, page roles, trusted text |
-| Adjudicate | `adjudicate.py` | deny/approve/review policy only |
-| Calibrate | `calibrate.py`, thin `pipeline.py` hooks | conf only; do not change labels |
-| Packaging | `Dockerfile`, `run.sh`, `.dockerignore` | Ship-align only |
+| name | primary paths | may touch | do not touch |
+|------|---------------|-----------|--------------|
+| lat-dpi | `ocr.py` defaults DPI/max_pages only | env docs | adjudicate, extract, run.sh |
+| lat-psm-lite | `ocr.py` PSM loops only | — | should_ocr, crops list, packaging |
+| lat-crops-lite | `ocr.py` `_stamp_crops` + binarize branches | — | full-page PSM list, packaging |
+| lat-select-ocr | `ocr.py` `should_ocr` + light `pipeline.py` hooks | — | stamp crop geometry, packaging |
+| lat-tiered | `ocr.py` new lite path + `pipeline.py` routing | calibrate flags | adjudicate rules |
+| lat-parallel-ship | `run.sh`, `cli.py`, `pipeline.predict_dir`/`run` | Dockerfile notes | OCR algorithm quality |
 
-## Residual bar (current)
+## Residual bar
 
-Beat **`promote_integrate` residual ~108.78 cat 0** (or document why a lower residual is acceptable for private robustness).
+- Prefer residual ≥ **104.45** cat 0 (no-cv2 floor) after cuts.
+- Stretch: approach **108.78** with OpenCV present **and** 4CPU ≤6 s/PDF.
+- Latency gate is hard for Ship-align even if residual dips slightly — document tradeoff.
 
-Score residual with local multi-process (see `solution/experiments/RESIDUAL.md`).  
-Modal is **not** required.
+## Compute
 
-Merge owner integrates after residual A/B on main.
+Local multi-process only. `MIB_WORKERS≤2` per Explore residual run. No Modal.

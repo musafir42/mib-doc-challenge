@@ -1,0 +1,4 @@
+  File "<stdin>", line 1
+    echo $! > artifacts/lat-psm-lite/farm.pid
+         ^
+SyntaxError: invalid syntax

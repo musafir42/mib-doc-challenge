@@ -1,0 +1,15 @@
+{
+  "run_name": "residual_reconfirm_cv2",
+  "primary": 104.7367511111111,
+  "extraction": 31.91111111111111,
+  "classification": 58.3,
+  "calibration": 14.52564,
+  "catastrophic": 0,
+  "git": "2aafd12",
+  "deps": [
+    "opencv-python-headless",
+    "numpy"
+  ],
+  "workers": 8,
+  "OMP_THREAD_LIMIT": 1
+}

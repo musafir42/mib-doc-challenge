@@ -1,0 +1,172 @@
+{
+  "n": 20,
+  "workers": 2,
+  "tier": "auto",
+  "wall_s": 35.175125493999985,
+  "avg_s": 3.3044000000000002,
+  "heavy": 2,
+  "light": 8,
+  "none": 10,
+  "rows": [
+    {
+      "case_id": "MIB-000039",
+      "tier": "heavy",
+      "ocr": true,
+      "adj": "APPROVED",
+      "sec": 30.75,
+      "path": "data/train/MIB-000039.pdf"
+    },
+    {
+      "case_id": "MIB-000050",
+      "tier": "none",
+      "ocr": false,
+      "adj": "NEEDS_REVIEW",
+      "sec": 0.057,
+      "path": "data/train/MIB-000050.pdf"
+    },
+    {
+      "case_id": "MIB-000060",
+      "tier": "none",
+      "ocr": false,
+      "adj": "APPROVED",
+      "sec": 0.051,
+      "path": "data/train/MIB-000060.pdf"
+    },
+    {
+      "case_id": "MIB-000075",
+      "tier": "none",
+      "ocr": false,
+      "adj": "NEEDS_REVIEW",
+      "sec": 0.04,
+      "path": "data/train/MIB-000075.pdf"
+    },
+    {
+      "case_id": "MIB-000089",
+      "tier": "none",
+      "ocr": false,
+      "adj": "NEEDS_REVIEW",
+      "sec": 0.014,
+      "path": "data/train/MIB-000089.pdf"
+    },
+    {
+      "case_id": "MIB-000097",
+      "tier": "light",
+      "ocr": true,
+      "adj": "DENIED",
+      "sec": 1.431,
+      "path": "data/train/MIB-000097.pdf"
+    },
+    {
+      "case_id": "MIB-000155",
+      "tier": "none",
+      "ocr": false,
+      "adj": "NEEDS_REVIEW",
+      "sec": 0.061,
+      "path": "data/train/MIB-000155.pdf"
+    },
+    {
+      "case_id": "MIB-000220",
+      "tier": "heavy",
+      "ocr": true,
+      "adj": "DENIED",
+      "sec": 25.542,
+      "path": "data/train/MIB-000220.pdf"
+    },
+    {
+      "case_id": "MIB-000332",
+      "tier": "none",
+      "ocr": false,
+      "adj": "NEEDS_REVIEW",
+      "sec": 0.045,
+      "path": "data/train/MIB-000332.pdf"
+    },
+    {
+      "case_id": "MIB-000375",
+      "tier": "none",
+      "ocr": false,
+      "adj": "NEEDS_REVIEW",
+      "sec": 0.057,
+      "path": "data/train/MIB-000375.pdf"
+    },
+    {
+      "case_id": "MIB-000405",
+      "tier": "none",
+      "ocr": false,
+      "adj": "NEEDS_REVIEW",
+      "sec": 0.04,
+      "path": "data/train/MIB-000405.pdf"
+    },
+    {
+      "case_id": "MIB-000429",
+      "tier": "light",
+      "ocr": true,
+      "adj": "NEEDS_REVIEW",
+      "sec": 0.896,
+      "path": "data/train/MIB-000429.pdf"
+    },
+    {
+      "case_id": "MIB-000445",
+      "tier": "light",
+      "ocr": true,
+      "adj": "DENIED",
+      "sec": 0.922,
+      "path": "data/train/MIB-000445.pdf"
+    },
+    {
+      "case_id": "MIB-000520",
+      "tier": "light",
+      "ocr": true,
+      "adj": "NEEDS_REVIEW",
+      "sec": 1.93,
+      "path": "data/train/MIB-000520.pdf"
+    },
+    {
+      "case_id": "MIB-000549",
+      "tier": "light",
+      "ocr": true,
+      "adj": "DENIED",
+      "sec": 0.872,
+      "path": "data/train/MIB-000549.pdf"
+    },
+    {
+      "case_id": "MIB-000597",
+      "tier": "light",
+      "ocr": true,
+      "adj": "DENIED",
+      "sec": 0.918,
+      "path": "data/train/MIB-000597.pdf"
+    },
+    {
+      "case_id": "MIB-000667",
+      "tier": "none",
+      "ocr": false,
+      "adj": "DENIED",
+      "sec": 0.036,
+      "path": "data/train/MIB-000667.pdf"
+    },
+    {
+      "case_id": "MIB-000841",
+      "tier": "light",
+      "ocr": true,
+      "adj": "NEEDS_REVIEW",
+      "sec": 1.164,
+      "path": "data/train/MIB-000841.pdf"
+    },
+    {
+      "case_id": "MIB-000932",
+      "tier": "light",
+      "ocr": true,
+      "adj": "DENIED",
+      "sec": 1.237,
+      "path": "data/train/MIB-000932.pdf"
+    },
+    {
+      "case_id": "MIB-000971",
+      "tier": "none",
+      "ocr": false,
+      "adj": "NEEDS_REVIEW",
+      "sec": 0.025,
+      "path": "data/train/MIB-000971.pdf"
+    }
+  ]
+}

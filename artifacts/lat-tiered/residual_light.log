@@ -1,0 +1,39 @@
+  5/100 last=MIB-000293 tier=light 2.7s
+  10/100 last=MIB-000573 tier=light 2.2s
+  15/100 last=MIB-000570 tier=light 2.5s
+  20/100 last=MIB-000398 tier=light 2.5s
+  25/100 last=MIB-000220 tier=light 1.7s
+  30/100 last=MIB-000752 tier=light 2.3s
+  35/100 last=MIB-000312 tier=light 1.9s
+  40/100 last=MIB-000745 tier=light 2.4s
+  45/100 last=MIB-000404 tier=light 2.0s
+  50/100 last=MIB-000536 tier=light 2.1s
+  55/100 last=MIB-000986 tier=light 2.5s
+  60/100 last=MIB-000945 tier=light 2.9s
+  65/100 last=MIB-000299 tier=light 2.3s
+  70/100 last=MIB-000693 tier=light 1.9s
+  75/100 last=MIB-000024 tier=light 2.4s
+  80/100 last=MIB-000036 tier=light 2.8s
+  85/100 last=MIB-000053 tier=light 2.1s
+  90/100 last=MIB-000079 tier=light 2.2s
+  95/100 last=MIB-000016 tier=light 2.5s
+  100/100 last=MIB-000066 tier=light 2.4s
+{
+  "run": "lat-tiered-light",
+  "MIB_OCR_TIER": "light",
+  "n": 100,
+  "workers": 2,
+  "OMP_THREAD_LIMIT": 1,
+  "wall_s": 88.78,
+  "avg_s": 1.752,
+  "p50_s": 2.129,
+  "p95_s": 2.927,
+  "tier_counts": {
+    "light": 76,
+    "none": 24
+  },
+  "pct_heavy": 0.0,
+  "pct_light": 76.0,
+  "pct_none": 24.0
+}
+DONE 100 → /root/dev-workspace/mib-doc-challenge/artifacts/lat-tiered/predictions_light.jsonl

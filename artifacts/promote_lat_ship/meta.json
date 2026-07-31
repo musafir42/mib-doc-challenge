@@ -1,0 +1,24 @@
+{
+  "run_name": "promote_lat_ship",
+  "primary": 108.1992,
+  "extraction": 33.900000000000006,
+  "classification": 59.5,
+  "calibration": 14.7992,
+  "catastrophic": 0,
+  "residual_wall_s": 300.9,
+  "workers": 8,
+  "merged": [
+    "lat-select-ocr should_ocr",
+    "lat-parallel-ship packaging",
+    "lat-dpi 200/4 defaults",
+    "opencv+numpy deps"
+  ],
+  "timing40": {
+    "n": 40,
+    "workers": 4,
+    "wall_s": 106.6755645275116,
+    "s_per_pdf": 2.66688911318779,
+    "ocr_rate": 0.4
+  },
+  "git": "2aafd12"
+}

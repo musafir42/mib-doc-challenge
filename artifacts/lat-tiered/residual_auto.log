@@ -1,0 +1,40 @@
+  5/100 last=MIB-000832 tier=light 1.3s
+  10/100 last=MIB-000097 tier=light 1.3s
+  15/100 last=MIB-000570 tier=heavy 36.3s
+  20/100 last=MIB-000452 tier=light 1.3s
+  25/100 last=MIB-000271 tier=light 1.6s
+  30/100 last=MIB-000297 tier=light 1.4s
+  35/100 last=MIB-000312 tier=heavy 35.5s
+  40/100 last=MIB-000745 tier=heavy 38.0s
+  45/100 last=MIB-000404 tier=heavy 36.7s
+  50/100 last=MIB-000536 tier=light 1.8s
+  55/100 last=MIB-000213 tier=heavy 50.8s
+  60/100 last=MIB-000805 tier=heavy 45.5s
+  65/100 last=MIB-000299 tier=heavy 56.3s
+  70/100 last=MIB-000002 tier=none 0.1s
+  75/100 last=MIB-000030 tier=light 2.0s
+  80/100 last=MIB-000047 tier=light 2.3s
+  85/100 last=MIB-000027 tier=heavy 48.1s
+  90/100 last=MIB-000003 tier=light 1.7s
+  95/100 last=MIB-000013 tier=light 2.1s
+  100/100 last=MIB-000066 tier=light 2.6s
+{
+  "run": "lat-tiered-auto",
+  "MIB_OCR_TIER": "auto",
+  "n": 100,
+  "workers": 2,
+  "OMP_THREAD_LIMIT": 1,
+  "wall_s": 1120.81,
+  "avg_s": 22.388,
+  "p50_s": 2.673,
+  "p95_s": 60.531,
+  "tier_counts": {
+    "heavy": 47,
+    "none": 24,
+    "light": 29
+  },
+  "pct_heavy": 47.0,
+  "pct_light": 29.0,
+  "pct_none": 24.0
+}
+DONE 100 → /root/dev-workspace/mib-doc-challenge/artifacts/lat-tiered/predictions_auto.jsonl

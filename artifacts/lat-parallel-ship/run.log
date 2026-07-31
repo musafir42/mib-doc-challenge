@@ -1,0 +1,86 @@
+=== Residual A/B workers=2 start 2026-07-31T02:16:02+00:00 load=7.94 8.85 10.91 ===
+n=100 workers=2 OMP=1
+  10/100 last=MIB-000573 35.3s elapsed=213.3s
+  20/100 last=MIB-000398 40.6s elapsed=385.7s
+  30/100 last=MIB-000752 70.2s elapsed=578.0s
+  40/100 last=MIB-000747 80.4s elapsed=791.2s
+  50/100 last=MIB-000536 42.6s elapsed=1008.9s
+  60/100 last=MIB-000945 50.0s elapsed=1256.3s
+  70/100 last=MIB-000002 0.2s elapsed=1421.0s
+  80/100 last=MIB-000036 67.8s elapsed=1554.5s
+  90/100 last=MIB-000058 75.8s elapsed=1765.2s
+  100/100 last=MIB-000066 32.3s elapsed=1917.2s
+{
+  "run": "lat-parallel-ship residual quality parity",
+  "n": 100,
+  "workers": 2,
+  "OMP_THREAD_LIMIT": "1",
+  "OMP_NUM_THREADS": "1",
+  "wall_sec": 1917.194985257,
+  "s_per_pdf_wall": 19.171949852570002,
+  "mean_per_pdf_sec": 38.215879223360005,
+  "median_per_pdf_sec": 42.51185255499968
+}
+DONE residual n=100 wall=1917.2s
+Score version: mib_weighted_v1
+Cases: 100
+Submitted records: 100
+Scored predictions: 100
+Missing cases: 0
+Extra cases: 0
+Duplicate case ids: 0
+Invalid adjudication records: 0
+Invalid confidence records: 0
+Invalid fee_status records: 0
+Field extraction: 31.91 / 50
+Classification: 58.30 / 80
+Calibration: 14.53 / 20
+Missing-case penalty: -0.00 / 10
+Deterministic score: 104.74 / 150
+Catastrophic false approvals: 0
+Mean confidence Brier: 0.1369
+Confusion:
+  APPROVED->APPROVED: 11
+  APPROVED->NEEDS_REVIEW: 17
+  DENIED->DENIED: 34
+  DENIED->NEEDS_REVIEW: 18
+  NEEDS_REVIEW->DENIED: 1
+  NEEDS_REVIEW->NEEDS_REVIEW: 19
+PRIMARY 104.7367511111111 CAT 0
+=== Timing 20 train PDFs workers=4 start 2026-07-31T02:48:00+00:00 ===
+bench n=20 workers=4 default_workers()=4
+sample: ['MIB-000026', 'MIB-000031', 'MIB-000033', 'MIB-000090', 'MIB-000096', 'MIB-000105', 'MIB-000115', 'MIB-000143', 'MIB-000229', 'MIB-000251', 'MIB-000282', 'MIB-000433', 'MIB-000559', 'MIB-000605', 'MIB-000655', 'MIB-000693', 'MIB-000755', 'MIB-000759', 'MIB-000760', 'MIB-000914']
+{
+  "run": "lat-parallel-ship timing 20 train PDFs",
+  "n": 20,
+  "workers": 4,
+  "OMP_THREAD_LIMIT": "1",
+  "wall_sec": 173.3668716229995,
+  "s_per_pdf_wall": 8.668343581149974,
+  "case_ids": [
+    "MIB-000026",
+    "MIB-000031",
+    "MIB-000033",
+    "MIB-000090",
+    "MIB-000096",
+    "MIB-000105",
+    "MIB-000115",
+    "MIB-000143",
+    "MIB-000229",
+    "MIB-000251",
+    "MIB-000282",
+    "MIB-000433",
+    "MIB-000559",
+    "MIB-000605",
+    "MIB-000655",
+    "MIB-000693",
+    "MIB-000755",
+    "MIB-000759",
+    "MIB-000760",
+    "MIB-000914"
+  ],
+  "target_s_per_pdf": 6.0,
+  "meets_6s": false
+}
+DONE timing wall=173.4s s/pdf=8.67
+=== ALL DONE 2026-07-31T02:50:54+00:00 ===

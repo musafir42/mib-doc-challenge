@@ -1,0 +1,22 @@
+{
+  "run_name": "residual_reconfirm",
+  "stage": "Integrate",
+  "slice": "residual_seg-v1",
+  "residual_version": "seg-v1",
+  "n": 100,
+  "workers": 8,
+  "OMP_THREAD_LIMIT": 1,
+  "primary": 104.45281777777777,
+  "extraction": 31.677777777777777,
+  "classification": 58.3,
+  "calibration": 14.47504,
+  "catastrophic": 0,
+  "wall_seconds": 313.7,
+  "git": "2aafd12",
+  "notes": "Host reconfirm after thrash fix (OMP=1). Score BELOW promote_integrate 108.78: cv2/numpy NOT installed (optional imports fail); deskew/CLAHE/Otsu degrade. tesseract 4.1.1. 52 field diffs vs promote preds; 6 adj diffs.",
+  "env": {
+    "tesseract": "4.1.1",
+    "cv2": false,
+    "numpy": false
+  }
+}

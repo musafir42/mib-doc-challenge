@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import json
+import os
+from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 
 from mib_solution.adjudicate import adjudicate
@@ -24,6 +26,21 @@ OUTPUT_KEYS = [
     "adjudication",
     "confidence",
 ]
+
+
+def default_workers() -> int:
+    """Ship default: min(4, cpu_count). Challenge scoring gives 4 vCPU.
+
+    Override with MIB_WORKERS. Pair with OMP_THREAD_LIMIT=1 so each worker
+    uses one core without OpenMP oversubscription inside tesseract/opencv.
+    """
+    env = os.environ.get("MIB_WORKERS")
+    if env is not None and str(env).strip() != "":
+        try:
+            return max(1, int(env))
+        except ValueError:
+            pass
+    return min(4, os.cpu_count() or 1)
 
 
 def _page_count(pdf_path: Path) -> int:
@@ -68,21 +85,38 @@ def predict_pdf(pdf_path: Path, use_ocr: bool | None = None) -> dict:
     return pred
 
 
-def predict_dir(input_dir: Path) -> list[dict]:
+def predict_dir(input_dir: Path, workers: int | None = None) -> list[dict]:
+    """Predict all PDFs in a directory.
+
+    Uses ProcessPoolExecutor when workers > 1 (default min(4, cpu_count)).
+    Output order is deterministic: sorted by case_id.
+    """
     pdfs = sorted(Path(input_dir).glob("*.pdf"))
-    return [predict_pdf(pdf) for pdf in pdfs]
+    if not pdfs:
+        return []
+    n_workers = default_workers() if workers is None else max(1, int(workers))
+    if n_workers <= 1 or len(pdfs) == 1:
+        preds = [predict_pdf(pdf) for pdf in pdfs]
+    else:
+        # map preserves input order; we re-sort by case_id below for determinism
+        with ProcessPoolExecutor(max_workers=n_workers) as ex:
+            preds = list(ex.map(predict_pdf, pdfs))
+    preds.sort(key=lambda p: str(p.get("case_id") or ""))
+    return preds
 
 
 def write_jsonl(path: Path, predictions: list[dict]) -> None:
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
+    # Deterministic write order even if caller passed unsorted preds
+    ordered = sorted(predictions, key=lambda p: str(p.get("case_id") or ""))
     with path.open("w", encoding="utf-8") as f:
-        for pred in predictions:
+        for pred in ordered:
             row = {k: pred[k] for k in OUTPUT_KEYS}
             f.write(json.dumps(row, sort_keys=True) + "\n")
 
 
-def run(input_dir: str | Path, output_path: str | Path) -> int:
-    predictions = predict_dir(Path(input_dir))
+def run(input_dir: str | Path, output_path: str | Path, workers: int | None = None) -> int:
+    predictions = predict_dir(Path(input_dir), workers=workers)
     write_jsonl(Path(output_path), predictions)
     return len(predictions)
