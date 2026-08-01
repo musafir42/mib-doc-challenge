@@ -13,7 +13,8 @@
 | Residual (anti-overfit + trusted text) | **104.22** /150 · cat **0** |
 | Residual (anti-overfit only) | 107.21 /150 · cat 0 |
 | Residual (prior brittle policy, reference) | 108.77 /150 · cat 0 |
-| Full train (prior brittle policy) | **118.91** /150 · cat **0** |
+| Full train (anti-overfit + trusted text) | **114.01** /150 · cat **0** |
+| Full train (prior brittle policy, reference) | **118.91** /150 · cat **0** |
 | Full train (anti-overfit clean) | *re-score in progress* → `artifacts/ship/anti_overfit/` |
 | Docker latency (lat40 @2w, CLAHE=0, 4c/8g) | **~5.71 s/PDF** · **PASS** (≤6 s) |
 | Image | `mib-submission:paddle-ft` · **~0.60 GiB** (≤4 GiB) |
@@ -107,9 +108,13 @@ Evidence snapshots (metrics only): `artifacts/ship/{residual_eval,train_eval,tra
 
 ## 6. Score breakdown
 
-**Residual (CLAHE=0):** extract 35.20 · class 58.30 · calib 15.27 · total **108.77** · cat 0  
+**Residual prior brittle (CLAHE=0):** extract 35.20 · class 58.30 · calib 15.27 · total **108.77** · cat 0  
 
-**Full train:** extract 43.48 · class 60.74 · calib 14.68 · total **118.91** · cat 0 · wall ~4.06 s/PDF @ W=2  
+**Residual anti-overfit + trusted text:** extract 33.83 · class 54.10 · calib 16.28 · total **104.22** · cat 0  
+
+**Full train prior brittle:** extract 43.48 · class 60.74 · calib 14.68 · total **118.91** · cat 0 · wall ~4.06 s/PDF @ W=2  
+
+**Full train anti-overfit + trusted text:** extract 40.77 · class 57.85 · calib 15.40 · total **114.01** · cat 0 · wall ~4.17 s/PDF @ W=2  
 
 ---
 

@@ -48,7 +48,8 @@ This is **not** the ship recipe (see `docs/APPROACH.md`). It captures what we le
 | Tesseract P1 | 108.44 · train 118.77 | ~5–6 s host @4w |
 | Base paddle full-page | **97.7** | very fast |
 | Paddle FT mid full-page | ~105 | fast |
-| **Paddle FT + regions (ship)** | **108.77 · train 118.91** | **~5.7 s Docker @2w** |
+| **Paddle FT + regions (pre-cleanup)** | **108.77 · train 118.91** | **~5.7 s Docker @2w** |
+| Paddle FT + anti-overfit + trusted text | **104.22 · train 114.01** | same engine path |
 | LFM / Florence / GOT / SmolDocling | slow or risky | not shippable under 6s / bans |
 
 VLMs/foundation models are **banned** in submitted runtime even if accurate.
@@ -92,7 +93,7 @@ After the overfit critique (`artifacts/ship/OVERFIT_CRITIQUE.md`), product polic
 ## 9. Suggested future work (ordered)
 
 1. **Val 5k** under Docker 4c/8g (true ship-align).  
-2. **Full train re-score** after anti-overfit cleanup; Docker confirm.  
+2. **Full train re-score** after anti-overfit cleanup alone (`artifacts/ship/anti_overfit/`); Docker confirm. Trusted-text full train done: **114.01**.  
 3. **Synth + RecAug retrain** on clean labels (no residual leak); re-score residual + train + lat40.  
 4. Optional: hybrid full-page paddle + fewer regions if lat headroom tightens.  
 5. Do **not** re-open VLM bakeoffs or re-add typo/SPN forests without val evidence.
@@ -108,7 +109,8 @@ After the overfit critique (`artifacts/ship/OVERFIT_CRITIQUE.md`), product polic
 | ship_train_docker lean tess | train | 116.07 |
 | promote_p1 residual / full | residual / train | 108.44 / **118.77** |
 | paddle FT ship (pre-cleanup) residual / full | residual / train | 108.77 / **118.91** |
-| **paddle FT anti-overfit residual** | residual | **107.21** |
+| paddle FT anti-overfit residual | residual | **107.21** |
 | paddle FT anti-overfit full train | train | see `artifacts/ship/anti_overfit/` when ready |
+| **paddle FT + trusted text residual / full** | residual / train | **104.22 / 114.01** |
 
-Use these as regression baselines when changing the ship path. Prefer **anti-overfit residual 107.21** over re-adding typo/SPN texture for residual points.
+Use these as regression baselines when changing the ship path. Prefer **trusted-text full train 114.01** / residual **104.22** (cat 0) over re-adding typo/SPN or decoy-page reads for proxy points.
