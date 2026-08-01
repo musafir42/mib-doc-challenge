@@ -282,7 +282,7 @@ def _normalize_purpose(raw: str) -> str | None:
         if known.startswith(text) and len(text) >= 4:
             return known
         # OCR near-miss: xenchotany / xenabotany
-        if _fuzzy_token(text.replace(" ", ""), known.replace(" ", ""), max_dist=2):
+        if _fuzzy_token(text.replace(" ", ""), known.replace(" ", ""), max_dist=1):
             return known
     if re.fullmatch(r"[a-z][a-z0-9 /-]{1,40}", text):
         return text
@@ -347,7 +347,7 @@ def _normalize_home_world(raw: str) -> str | None:
             return known
         if compact.startswith(kcomp) and len(kcomp) >= 5:
             return known
-        if _fuzzy_token(compact, kcomp, max_dist=3):
+        if _fuzzy_token(compact, kcomp, max_dist=1):
             # track closest
             best = known
             best_d = 3
@@ -375,7 +375,7 @@ def _normalize_species(raw: str) -> str | None:
             return known
         if tok.startswith(known) and len(known) >= 5:
             return known
-        if _fuzzy_token(tok, known, max_dist=3):
+        if _fuzzy_token(tok, known, max_dist=1):
             return known
     # Allow species-like tokens with underscore segments
     if re.fullmatch(r"[A-Z]{3,}(?:_[A-Z0-9]+){0,4}", tok) and tok not in SPECIES_BLOCKLIST:

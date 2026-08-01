@@ -74,14 +74,28 @@ VLMs/foundation models are **banned** in submitted runtime even if accurate.
 
 ---
 
-## 8. Suggested future work (ordered)
+## 8. Anti-overfit cleanup applied (ship code)
+
+After the overfit critique (`artifacts/ship/OVERFIT_CRITIQUE.md`), product policy was cleaned:
+
+| Change | Why |
+|--------|-----|
+| Dropped `EXTRA_REVOKED_SPONSORS` | Train-mined IDs beyond public manual |
+| Dropped OCR garble risk pattern bank | Train P≥0.97 texture; not maintainable |
+| Finding line = clean `Finding: APPROVED\|DENIED\|NEEDS_REVIEW` only | No Fouing/DEMED forests |
+| Fuzzy extract dist 3→1 | Less wrong-snap to closed vocab |
+| `adjudicate` returns `_adj_reason` | Wire path calib correctly |
+| CLAHE default **0** in `ocr_paddle` | Match Docker lat40 |
+
+**Measured residual after cleanup:** **107.21** /150 cat 0 (was 108.77; class 55.9 vs 58.3). Prefer this over brittle points.
+
+## 9. Suggested future work (ordered)
 
 1. **Val 5k** under Docker 4c/8g (true ship-align).  
-2. **Docker full train** confirm ≈ 118.91.  
+2. **Full train re-score** after anti-overfit cleanup; Docker confirm.  
 3. **Synth + RecAug retrain** on clean labels (no residual leak); re-score residual + train + lat40.  
-4. Slim **adjudicate** OCR-tolerant regexes once rec is strong enough (measure cat 0).  
-5. Optional: hybrid full-page paddle + fewer regions if lat headroom tightens.  
-6. Do **not** re-open VLM bakeoffs for submit runtime.
+4. Optional: hybrid full-page paddle + fewer regions if lat headroom tightens.  
+5. Do **not** re-open VLM bakeoffs or re-add typo/SPN forests without val evidence.
 
 ---
 

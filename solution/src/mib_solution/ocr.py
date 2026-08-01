@@ -492,17 +492,14 @@ _APPLICANT_LABEL_RE = re.compile(
     r"(?:Applicant(?:\s+Name)?|Registry Name|Full Name)\s*(?:\n|:)\s*[A-Za-z]",
     re.IGNORECASE,
 )
-# Align with adjudicate Finding tolerance (stamp OCR variants).
+# Clean Finding line only — match adjudicate (no OCR typo banks).
 _FINDING_RE = re.compile(
-    r"(?:Finding|Findigg|Fouing|Fearg|Pearg|Frdirg|Feging|Findey|Findng|"
-    r"Finis|Finsiege|F[il1]nd[il1]?[nhg]g?)"
-    r"\s*[:.\-]?\s*"
-    r"(APPROVED|DENIED|NEEDS_REVIEW|DENED|DEMED|DENIER|DENY)\b",
+    r"Finding\s*:\s*(APPROVED|DENIED|NEEDS_REVIEW)\b",
     re.IGNORECASE,
 )
 _DQ_RE = re.compile(
     r"biohazard(?:_red)?|planetary[_\s\-]?embargo|active[_\s\-]?warrant|"
-    r"memory[_\s\-]?tamper|\bEMBARGO\s+REVIEW\b|\bembargo\b|\bwarrant\b|\btamper",
+    r"memory[_\s\-]?tamper|\bEMBARGO\s+REVIEW\b",
     re.IGNORECASE,
 )
 _RISK_LINE_RE = re.compile(

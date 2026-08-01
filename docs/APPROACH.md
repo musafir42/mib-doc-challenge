@@ -10,15 +10,17 @@
 
 | Gate | Result |
 |------|--------|
-| Residual | **108.77** /150 · cat **0** |
-| Full train | **118.91** /150 · cat **0** |
+| Residual (anti-overfit clean policy) | **107.21** /150 · cat **0** |
+| Residual (prior brittle policy, reference) | 108.77 /150 · cat 0 |
+| Full train (prior brittle policy) | **118.91** /150 · cat **0** |
+| Full train (anti-overfit clean) | *re-score in progress* → `artifacts/ship/anti_overfit/` |
 | Docker latency (lat40 @2w, CLAHE=0, 4c/8g) | **~5.71 s/PDF** · **PASS** (≤6 s) |
 | Image | `mib-submission:paddle-ft` · **~0.60 GiB** (≤4 GiB) |
 | Models | ~**14 MiB** under `solution/models/paddle/` |
 
-**Comparators:** tesseract P1 full train **118.77** · lean docker tess **116.07** · historical integrate **119.27** (always-OCR-class, not same latency budget).
+**Comparators:** tesseract P1 full train **118.77** · lean docker tess **116.07** · historical integrate **119.27**.
 
-Paddle FT ship: **+0.14** vs P1 full train, **+2.84** vs lean ship, **−0.36** vs hist integrate.
+Policy was cleaned for generalization (see `docs/LESSONS.md` and `artifacts/ship/OVERFIT_CRITIQUE.md`): drop train-mined EXTRA SPNs, OCR garble risk maps, and Finding typo banks. Residual dropped **−1.56** (mostly class) with **cat still 0** — intentional trade for maintainability.
 
 ---
 

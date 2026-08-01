@@ -68,9 +68,10 @@ def predict_pdf(pdf_path: Path, use_ocr: bool | None = None) -> dict:
     # Ensure text length proxy is available for calibrate
     if fields.get("_text_len") is None:
         fields["_text_len"] = len(fields.get("_text") or text or "")
-    adjudication, _legacy_conf = adjudicate(fields)
+    adjudication, _legacy_conf, adj_reason = adjudicate(fields)
+    fields["_adj_reason"] = adj_reason
     # Feature/path-based confidence (Brier); does not change adjudication
-    confidence = calibrate(fields, adjudication, reason=fields.get("_adj_reason"))
+    confidence = calibrate(fields, adjudication, reason=adj_reason)
     pred = {k: fields.get(k, "unknown") for k in OUTPUT_KEYS if k not in {"adjudication", "confidence"}}
     pred["adjudication"] = adjudication
     pred["confidence"] = float(confidence)

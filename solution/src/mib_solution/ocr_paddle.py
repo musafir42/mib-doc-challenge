@@ -224,11 +224,12 @@ def ocr_pdf_text(pdf_path: Path, dpi: int = 150, max_pages: int = 4) -> str:
         max_pages = int(os.environ.get("MIB_OCR_MAX_PAGES", str(max_pages)))
     except ValueError:
         pass
-    use_clahe = os.environ.get("MIB_OCR_CLAHE", "1").strip().lower() not in {
-        "0",
-        "false",
-        "no",
-        "off",
+    # Default off — matches Docker lat40 ship (CLAHE=1 fails ≤6 s on 8g).
+    use_clahe = os.environ.get("MIB_OCR_CLAHE", "0").strip().lower() in {
+        "1",
+        "true",
+        "yes",
+        "on",
     }
     use_regions = os.environ.get("MIB_OCR_REGIONS", "1").strip().lower() not in {
         "0",

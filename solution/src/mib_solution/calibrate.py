@@ -12,22 +12,24 @@ Does not change adjudication — confidence only.
 
 from __future__ import annotations
 
-# Path priors from full-train OCR path accuracy (modal_full_ocr, n=1000),
-# mildly shrunk away from 0/1. Residual stamp OCR can be slightly noisier
-# on transit/unpaid, so those sit a bit under full-train rates.
+# Conservative path priors for Brier (not train residual tables).
+# Prefer mid-high confidence on clear policy paths; low on default review.
 PATH_CONF: dict[str, float] = {
+    "thin_text": 0.12,
     "short_text": 0.12,
-    "finding_approved": 0.98,
-    "finding_denied": 0.98,
-    "finding_review": 0.96,
-    "text_dq": 0.96,
-    "flags_dq": 0.94,
+    "finding_approved": 0.95,
+    "finding_denied": 0.95,
+    "finding_review": 0.85,
+    "damaged_packet": 0.55,
+    "text_dq": 0.90,
+    "flags_dq": 0.90,
     "transit7": 0.88,
     "unpaid": 0.88,
-    "revoked": 0.92,
-    "multi_review": 0.62,
-    "extra_revoked": 0.95,
-    "default_review": 0.28,  # refined by features below
+    "revoked_sponsor": 0.90,
+    "revoked": 0.90,
+    "multi_review": 0.70,
+    "stale_arrival": 0.85,
+    "default_review": 0.30,  # refined by features below
 }
 
 FIELD_KEYS = (
