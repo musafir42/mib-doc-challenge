@@ -107,6 +107,8 @@ After the overfit critique (`artifacts/ship/OVERFIT_CRITIQUE.md`), product polic
 | hist promote_integrate full | train | **119.27** |
 | ship_train_docker lean tess | train | 116.07 |
 | promote_p1 residual / full | residual / train | 108.44 / **118.77** |
-| **paddle FT ship residual / full** | residual / train | **108.77 / 118.91** |
+| paddle FT ship (pre-cleanup) residual / full | residual / train | 108.77 / **118.91** |
+| **paddle FT anti-overfit residual** | residual | **107.21** |
+| paddle FT anti-overfit full train | train | see `artifacts/ship/anti_overfit/` when ready |
 
-Use these as regression baselines when changing the ship path.
+Use these as regression baselines when changing the ship path. Prefer **anti-overfit residual 107.21** over re-adding typo/SPN texture for residual points.
