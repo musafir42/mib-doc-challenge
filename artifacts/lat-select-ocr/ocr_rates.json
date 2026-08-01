@@ -1,9 +1,0 @@
-{
-  "residual_ocr_rate": 0.86,
-  "residual_skip_rate": 0.14,
-  "train50_ocr_rate": 0.42,
-  "train50_skip_rate": 0.58,
-  "train200_ocr_rate": 0.42,
-  "train200_skip_rate": 0.58,
-  "seed": 42
-}

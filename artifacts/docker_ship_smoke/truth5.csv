@@ -1,6 +1,0 @@
-case_id,applicant_name,species_code,home_world,visa_class,sponsor_id,arrival_date,declared_purpose,risk_flags,fee_status,adjudication
-MIB-000001,Ixodane Luzarn,VENUSIAN_MYCELIAL,Barnard-c,DIP-1,SPN-4732,2026-02-10,reactor maintenance,sponsor_mismatch,paid,NEEDS_REVIEW
-MIB-000002,Miraquell Ixovara,JOVIAN_GASFORM,Europa Station,DIP-1,SPN-6712,2026-06-03,cultural exchange,none,paid,APPROVED
-MIB-000003,Solix Qorquell,LUNA_SECURID,Wolf-1061c,XW-1,SPN-6799,2026-03-15,xenobotany,illegible_biometrics|sponsor_mismatch,paid,DENIED
-MIB-000010,Ixomora Solul,JOVIAN_GASFORM,Europa Station,DIP-1,SPN-7290,2026-03-13,archive audit,none,paid,NEEDS_REVIEW
-MIB-000033,Xanvoss Nexix,TRIANGULAN,Europa Station,MED-3,SPN-2193,2026-02-13,reactor maintenance,biohazard_red,paid,DENIED
