@@ -1,21 +1,11 @@
 # Active agents
 
-Merge owner maintains this table. **Empty = no parallel Explore agents running.**
+## Ship: paddle FT (submit path)
+- Product default OCR: paddle (`solution/src/mib_solution/ocr_paddle.py`)
+- Scores: residual **108.77** / full train **118.91** cat 0
+- Docker: `mib-submission:paddle-ft` · lat40 ~5.71 s/PDF @2w · CLAHE=0
+- Report: `artifacts/paddle-ft-v2/ship/SHIP_REPORT.md` · `solution/SHIP.md`
+- Branch: `ship/paddle-ft` (commit/pack)
 
-| name | worktree | goal | started | deadline | status |
-|------|----------|------|---------|----------|--------|
-| lat-dpi | worktrees/lat-dpi | DPI/max_pages lean | 2026-07-31 | — | **DONE** 104.14 cat0 — partial promote (dpi defaults) |
-| lat-psm-lite | worktrees/lat-psm-lite | Fewer PSM | 2026-07-31 | — | **DONE** 102.29 — NO solo |
-| lat-crops-lite | worktrees/lat-crops-lite | Fewer crops | 2026-07-31 | — | **DONE** 103.96 — NO solo |
-| lat-select-ocr | worktrees/lat-select-ocr | should_ocr gate | 2026-07-31 | — | **DONE** 108.89 — **PROMOTED** |
-| lat-tiered | worktrees/lat-tiered | light/heavy tiers | 2026-07-31 | — | **DONE** 100.38 — hold |
-| lat-parallel-ship | worktrees/lat-parallel-ship | ProcessPool+OMP | 2026-07-31 | — | **DONE** 104.74 parity — **PROMOTED** |
-
-## Integrate result
-
-`promote_lat_ship` on main `solution/`: residual **108.20** cat 0; train40 **2.67 s/PDF @ 4 workers**.
-
-## Notes
-
-- Latency fan-out complete 2026-07-31.
-- Next: Docker rebuild + full train + val under ship flags.
+## Retired as submit target
+- tesseract promote_p1 (still in tree as `MIB_OCR_ENGINE=tesseract` A/B)

@@ -48,6 +48,12 @@ Scale is always **/150**. Residual = hard subset (seg-v1 n=100), not a different
 | 2026-07-31 | lat-crops-lite | Explore | residual_seg-v1 | **103.96** | 0 | 3-band crops no adaptive; ~31% faster OCR; below floor — NO solo | artifacts/lat-crops-lite/ | explore |
 | 2026-07-31 | lat-select-ocr | Explore | residual_seg-v1 | **108.89** | 0 | smarter should_ocr; residual OCR 86% / train skip ~58%; **best residual**; latency YES | artifacts/lat-select-ocr/ | explore |
 | 2026-07-31 | promote_lat_ship | Integrate | residual_seg-v1 | **108.20** | 0 | merge select-ocr+parallel ship+dpi200/4+opencv; residual wall ~301s@8; train40 **2.67 s/PDF @4 workers** (ocr~40%) under 6s budget | artifacts/promote_lat_ship/ | 2aafd12 |
+| 2026-07-31 | ship_train_docker | Ship-align | train_full | **116.07** | 0 | Docker 4CPU/8g/network-none/read-only; wall **45m** (~2.7s/PDF); below historical 119.27 (select-ocr+dpi lean tradeoff); cat 0 | artifacts/ship_train/ | f34fd4a |
+
+| 2026-07-31 | promote_p1 | Integrate | residual_seg-v1 | **108.44** | 0 | P1 should_ocr only (Finding/DQ skip); full re-score main | artifacts/promote_p1/ | f34fd4a+p1 |
+| 2026-07-31 | promote_p1_full | Integrate | train_full | **118.77** | 0 | Host W=4 OMP=1; wall ~96.5m (~5.79 s/PDF); +2.70 vs ship 116.07; near hist 119.27; lat40 5.09s PASS | artifacts/promote_p1/ | f34fd4a+p1 |
+| 2026-08-01 | paddle_ft_ship | Ship-align | residual_seg-v1 | **108.77** | 0 | Paddle FT best_ep5 + geometry regions; CLAHE=0; product default OCR | artifacts/paddle-ft-v2/ship/residual_clahe0/ | ship/paddle-ft |
+| 2026-08-01 | paddle_ft_ship_full | Ship-align | train_full | **118.91** | 0 | Host W=2 CLAHE=0 ~4.06 s/PDF; Docker lat40 ~5.71 s/PDF @2w PASS; image mib-submission:paddle-ft | artifacts/paddle-ft-v2/ship/train/ | ship/paddle-ft |
 
 ## Campaign note (2026-07-30)
 

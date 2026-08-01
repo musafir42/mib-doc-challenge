@@ -4,25 +4,31 @@ set -euo pipefail
 input_dir="${1:?usage: run.sh <input_pdf_dir> <output_path>}"
 output_path="${2:?usage: run.sh <input_pdf_dir> <output_path>}"
 
-# Challenge runtime mounts root FS read-only with tmpfs on /tmp only.
-# Force all temp/OCR/pdf2image scratch into /tmp (not /app or $HOME).
+# Challenge runtime: root FS read-only, tmpfs on /tmp only.
 export TMPDIR="${TMPDIR:-/tmp}"
 export TEMP="${TEMP:-/tmp}"
 export TMP="${TMP:-/tmp}"
 export HOME="${HOME:-/tmp}"
 export XDG_CACHE_HOME="${XDG_CACHE_HOME:-/tmp/.cache}"
-export TESSDATA_PREFIX="${TESSDATA_PREFIX:-/usr/share/tesseract-ocr/5/tessdata}"
 mkdir -p "$TMPDIR" "$XDG_CACHE_HOME" 2>/dev/null || true
 
-# Scoring gives 4 vCPU. One process per vCPU; one OpenMP/tesseract thread each.
-# Without OMP=1, multi-thread tesseract thrash makes OCR wall-time explode.
+# Paddle ship defaults (override at docker run if needed)
+export MIB_OCR_ENGINE="${MIB_OCR_ENGINE:-paddle}"
+export MIB_PADDLE_MODELS="${MIB_PADDLE_MODELS:-/app/models/paddle}"
+export MIB_OCR_DPI="${MIB_OCR_DPI:-150}"
+export MIB_OCR_MAX_PAGES="${MIB_OCR_MAX_PAGES:-4}"
+# CLAHE off: Docker lat40 @2w was 5.71 s/PDF (PASS); CLAHE on was ~6.3 (fail).
+export MIB_OCR_CLAHE="${MIB_OCR_CLAHE:-0}"
+export CUDA_VISIBLE_DEVICES="${CUDA_VISIBLE_DEVICES:-}"
+export FLAGS_use_mkldnn="${FLAGS_use_mkldnn:-0}"
+
+# 4 vCPU scoring box is 8 GiB: 3+ paddle workers OOM; 2 workers OK.
 export OMP_THREAD_LIMIT="${OMP_THREAD_LIMIT:-1}"
 export OMP_NUM_THREADS="${OMP_NUM_THREADS:-1}"
 export OPENBLAS_NUM_THREADS="${OPENBLAS_NUM_THREADS:-1}"
 export MKL_NUM_THREADS="${MKL_NUM_THREADS:-1}"
-export MIB_WORKERS="${MIB_WORKERS:-4}"
+export MIB_WORKERS="${MIB_WORKERS:-2}"
 
-# Prefer installed package; fall back to src layout inside the image.
 if command -v mib-solution >/dev/null 2>&1; then
   mib-solution "$input_dir" "$output_path"
 else

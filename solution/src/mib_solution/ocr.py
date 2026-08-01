@@ -1,12 +1,10 @@
-"""OCR fallback with stronger deskew + selective binarize (exp-deskew-v2).
+"""OCR for MIB ship pipeline.
 
-Builds on exp-deskew (residual 101.70 cat 0) and exp-stamp-ocr (100.90):
-- Rasterize at ~275 DPI
-- Stronger deskew: finer projection search (0.25°) + Hough consensus; apply ≥0.55°
-- Full page: deskewed psm 6/11/4 (natural image first — never replace with binary)
-- Stamp crops: CLAHE (psm 6+11) then additive Otsu / adaptive binarize (psm 6)
-- Unique-line merge preserves earlier natural OCR for first-match extract
-- No unconditional red-boost (hurt residual in deskew v1 A/B)
+**Default (ship):** PaddleOCR + fine-tuned rec + geometry region crops
+(``ocr_paddle``). Non-brittle path — no multi-PSM tesseract ensemble.
+
+Legacy tesseract deskew/stamp path remains as ``tesseract_ocr_pdf_text`` for
+A/B only (``MIB_OCR_ENGINE=tesseract``).
 """
 
 from __future__ import annotations
@@ -40,11 +38,20 @@ except Exception:  # pragma: no cover
 
 
 def ocr_available() -> bool:
-    if convert_from_path is None or pytesseract is None:
-        return False
-    from shutil import which
+    """True when the active OCR engine can run."""
+    engine = os.environ.get("MIB_OCR_ENGINE", "paddle").strip().lower()
+    if engine in {"tesseract", "tess"}:
+        if convert_from_path is None or pytesseract is None:
+            return False
+        from shutil import which
 
-    return which("tesseract") is not None
+        return which("tesseract") is not None
+    try:
+        from mib_solution.ocr_paddle import ocr_available as _paddle_ok
+
+        return _paddle_ok()
+    except Exception:
+        return False
 
 
 # ---------------------------------------------------------------------------
@@ -366,12 +373,27 @@ def _merge_unique_texts(chunks: list[str]) -> str:
     return "\n".join(kept)
 
 
-def ocr_pdf_text(pdf_path: Path, dpi: int = 200, max_pages: int = 4) -> str:
-    """Rasterize, stronger-deskew, OCR full page + CLAHE/binary stamp crops.
+def ocr_pdf_text(pdf_path: Path, dpi: int = 150, max_pages: int = 4) -> str:
+    """Ship OCR entrypoint.
 
-    Ship-leaner defaults (dpi=200, max_pages=4). Override: MIB_OCR_DPI / MIB_OCR_MAX_PAGES.
+    Default: Paddle FT path (``ocr_paddle``). Set ``MIB_OCR_ENGINE=tesseract``
+    for the legacy multi-PSM deskew/stamp path.
     """
-    if not ocr_available():
+    engine = os.environ.get("MIB_OCR_ENGINE", "paddle").strip().lower()
+    if engine not in {"tesseract", "tess"}:
+        from mib_solution.ocr_paddle import ocr_pdf_text as _paddle_ocr
+
+        return _paddle_ocr(pdf_path, dpi=dpi, max_pages=max_pages)
+    return tesseract_ocr_pdf_text(pdf_path, dpi=dpi if dpi else 200, max_pages=max_pages)
+
+
+def tesseract_ocr_pdf_text(pdf_path: Path, dpi: int = 200, max_pages: int = 4) -> str:
+    """Legacy tesseract multi-PSM + stamp crops (A/B only; not ship default)."""
+    if convert_from_path is None or pytesseract is None:
+        return ""
+    from shutil import which
+
+    if which("tesseract") is None:
         return ""
     path = Path(pdf_path)
     if not path.exists():
@@ -525,9 +547,11 @@ def should_ocr(text_layer: str, force: bool = False) -> bool:
     """Decide whether heavy OCR is worth the cost.
 
     Returns True (run OCR) for thin, incomplete, or residual-like packets.
-    Returns False (skip OCR) only when the text layer is rich AND either:
-      - already has trusted adjudication signals (Finding / DQ tokens), or
-      - is an ultra-complete form (most field labels + risk/fee surface).
+    Returns False (skip OCR) **only** when the text layer already carries a
+    trusted adjudication signal (Finding line and/or DQ tokens) with solid
+    structure. Ultra-rich forms without Finding/DQ still OCR — full-train
+    ship analysis showed bare ultra-rich skips lose stamp DENIED/APPROVED
+    and fee/risk fields (score_recovery require_adj / P1).
     """
     if force:
         return True
@@ -537,6 +561,12 @@ def should_ocr(text_layer: str, force: bool = False) -> bool:
     # Escape hatch for pure text-layer A/B (not used in ship).
     if os.environ.get("MIB_SKIP_OCR", "").strip().lower() in {"1", "true", "yes"}:
         return False
+    # Ablation: restore ship ultra-rich skips (latency only; quality regresses).
+    allow_ultrarich_skip = os.environ.get("MIB_OCR_ULTRARICH_SKIP", "").strip().lower() in {
+        "1",
+        "true",
+        "yes",
+    }
 
     f = _text_layer_structure(text_layer or "")
     n = int(f["n"])
@@ -582,33 +612,32 @@ def should_ocr(text_layer: str, force: bool = False) -> bool:
     if has_dq and has_finding and s >= 5 and n >= 450:
         return False
 
-    # Ultra-rich complete form: extract works; adj can use risk/fee/purpose surface.
-    if (
-        s >= 8
-        and n >= 650
-        and has_spn
-        and has_visa
-        and has_date
-        and has_species
-        and has_home
-        and (has_risk_line or has_fee or has_purpose)
-    ):
-        return False
-    if s >= 9 and n >= 600 and has_spn and has_visa and has_date:
-        return False
+    # Optional legacy ultra-rich skips (off by default — full-train recovery P1).
+    if allow_ultrarich_skip:
+        if (
+            s >= 8
+            and n >= 650
+            and has_spn
+            and has_visa
+            and has_date
+            and has_species
+            and has_home
+            and (has_risk_line or has_fee or has_purpose)
+        ):
+            return False
+        if s >= 9 and n >= 600 and has_spn and has_visa and has_date:
+            return False
+        if (
+            has_manual
+            and has_risk_line
+            and s >= 7
+            and n >= 600
+            and has_spn
+            and has_visa
+        ):
+            return False
 
-    # Manual notes + risk line on a rich packet → text path sufficient.
-    if (
-        has_manual
-        and has_risk_line
-        and s >= 7
-        and n >= 600
-        and has_spn
-        and has_visa
-    ):
-        return False
-
-    # Default: OCR (protect residual stamp / incomplete extract cases).
+    # Default: OCR (protect stamp Finding / fee-receipt / risk-stamp cases).
     return True
 
 

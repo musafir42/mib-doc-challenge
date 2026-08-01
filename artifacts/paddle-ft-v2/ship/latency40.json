@@ -1,0 +1,11 @@
+{
+  "n": 40,
+  "workers": 4,
+  "wall_s": 105.42067122600565,
+  "s_per_pdf_wall": 2.6355167806501414,
+  "mean_case_s": 10.185921947648604,
+  "p90_case_s": 12.905968811988714,
+  "gate_6s": true,
+  "engine": "paddle_ft_ship",
+  "models": "solution/models/paddle"
+}
