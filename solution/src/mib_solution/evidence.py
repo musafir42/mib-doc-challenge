@@ -267,15 +267,12 @@ def page_sort_key(field: str, page: PageEvidence) -> tuple[int, int, int]:
 
 
 def iter_pages_for_field(field: str, pages: list[PageEvidence]) -> list[PageEvidence]:
-    """Pages ordered for a field, excluding pure decoy/empty unless nothing else."""
+    """Pages ordered for a field. Never fall back to decoy/empty (anti-injection)."""
     usable = [
         p
         for p in pages
         if p.page_type not in {"decoy", "empty"} and len((p.text or "").strip()) >= 20
     ]
-    if not usable:
-        # image-only / answer-key-only packets: allow non-empty pages as last resort
-        usable = [p for p in pages if len((p.text or "").strip()) >= 20]
     return sorted(usable, key=lambda p: page_sort_key(field, p))
 
 

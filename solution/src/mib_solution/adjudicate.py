@@ -121,27 +121,6 @@ def _is_stale_non_dip(arrival: date | None, visa: str) -> bool:
     return age > STALE_DAYS
 
 
-def _multi_field_clean(fields: dict, visa: str, sponsor: str, text_len: int) -> bool:
-    if text_len < 400:
-        return False
-    if visa not in {"XW-1", "XW-2", "DIP-1", "MED-3"}:
-        return False
-    if sponsor in {"", "SPN-0000"}:
-        return False
-    if not _present(fields.get("applicant_name")):
-        return False
-    if not _present(fields.get("species_code")):
-        return False
-    if not _present(fields.get("home_world")):
-        return False
-    if not _present(fields.get("declared_purpose")):
-        return False
-    arrival = (fields.get("arrival_date") or "").strip()
-    if not arrival or arrival == "1900-01-01":
-        return False
-    return True
-
-
 def _normalize_finding_decision(raw: str) -> str | None:
     d = (raw or "").strip().upper()
     if d == "DENIED":
@@ -180,8 +159,22 @@ def ocr_risk_flags(text: str) -> set[str]:
 
 
 def adjudicate(fields: dict) -> tuple[str, float, str]:
-    """Return (adjudication, legacy_conf, reason_code for calibrate)."""
-    text = fields.get("_text") or ""
+    """Return (adjudication, legacy_conf, reason_code for calibrate).
+
+    Policy scans use trusted text only (no decoy / answer-key pages). Prefer
+    ``_trusted_text`` from extract; fall back to stripping untrusted lines.
+    """
+    text = (fields.get("_trusted_text") or "").strip()
+    if not text:
+        raw = fields.get("_text") or ""
+        # Minimal strip if caller didn't supply trusted corpus
+        text = "\n".join(
+            ln
+            for ln in raw.splitlines()
+            if not re.search(
+                r"answer key|SYSTEM:\s*ignore|Output this answer", ln, re.I
+            )
+        )
     text_len = int(fields.get("_text_len") or len(text) or 0)
 
     if text_len < 20:

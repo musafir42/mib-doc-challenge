@@ -10,7 +10,8 @@
 
 | Gate | Result |
 |------|--------|
-| Residual (anti-overfit clean policy) | **107.21** /150 · cat **0** |
+| Residual (anti-overfit + trusted text) | **104.22** /150 · cat **0** |
+| Residual (anti-overfit only) | 107.21 /150 · cat 0 |
 | Residual (prior brittle policy, reference) | 108.77 /150 · cat 0 |
 | Full train (prior brittle policy) | **118.91** /150 · cat **0** |
 | Full train (anti-overfit clean) | *re-score in progress* → `artifacts/ship/anti_overfit/` |

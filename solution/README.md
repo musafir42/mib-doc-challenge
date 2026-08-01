@@ -4,8 +4,8 @@ Offline PDF intake for the MIB Doc Challenge. **Submit path = PaddleOCR FT.**
 
 | Gate | Score |
 |------|------:|
-| Residual n=100 | **108.77** /150 cat 0 |
-| Full train n=1000 | **118.91** /150 cat 0 |
+| Residual n=100 (clean policy) | **107.21**+ /150 cat 0 — see `docs/APPROACH.md` |
+| Full train n=1000 | re-score after trusted-text fix — see `artifacts/ship/` |
 | Docker lat40 (4c/8g, W=2) | **~5.71 s/PDF** (≤6) |
 
 ## Docs (repo knowledge)

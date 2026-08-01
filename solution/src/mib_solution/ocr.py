@@ -549,6 +549,9 @@ def should_ocr(text_layer: str, force: bool = False) -> bool:
     structure. Ultra-rich forms without Finding/DQ still OCR — full-train
     ship analysis showed bare ultra-rich skips lose stamp DENIED/APPROVED
     and fee/risk fields (score_recovery require_adj / P1).
+
+    Untrusted/decoy lines are stripped before probing Finding so a hidden
+    answer-key Finding cannot suppress OCR of the real stamp.
     """
     if force:
         return True
@@ -565,7 +568,18 @@ def should_ocr(text_layer: str, force: bool = False) -> bool:
         "yes",
     }
 
-    f = _text_layer_structure(text_layer or "")
+    # Drop obvious injection / answer-key lines before structure probes.
+    layer = text_layer or ""
+    layer = "\n".join(
+        ln
+        for ln in layer.splitlines()
+        if not re.search(
+            r"answer key|SYSTEM:\s*ignore|ignore visible evidence|Output this answer",
+            ln,
+            re.I,
+        )
+    )
+    f = _text_layer_structure(layer)
     n = int(f["n"])
     s = int(f["struct"])
 

@@ -16,7 +16,6 @@ from mib_solution.evidence import (
     FieldCandidate,
     PageEvidence,
     build_evidence_bundle,
-    full_corpus,
     iter_pages_for_field,
     pick_candidate,
     strip_untrusted_lines,
@@ -486,7 +485,8 @@ def _collect_species(pages: list[PageEvidence]) -> str:
                         cands.append(_cand("species_code", norm, page, rank_boost=3))
     if cands:
         return pick_candidate(cands) or "unknown"
-    full = full_corpus(pages)
+    # Trusted free-form fallback only (no decoy corpus).
+    full = trusted_corpus(pages)
     for raw in _all_labels("species_code", full):
         norm = _normalize_species(raw)
         if norm:
@@ -517,7 +517,7 @@ def _collect_home_world(pages: list[PageEvidence]) -> str:
     hit = pick_candidate(cands)
     if hit:
         return hit
-    full = full_corpus(pages)
+    full = trusted_corpus(pages)
     for raw in _all_labels("home_world", full):
         norm = _normalize_home_world(raw)
         if norm:
@@ -525,7 +525,6 @@ def _collect_home_world(pages: list[PageEvidence]) -> str:
     for known in KNOWN_HOME_WORLDS:
         if known.casefold() in full.casefold():
             return known
-    # fuzzy scan line-ish tokens against known worlds
     for m in re.finditer(r"([A-Za-z][A-Za-z0-9 .'-]{2,30})", full):
         norm = _normalize_home_world(m.group(1))
         if norm and norm in KNOWN_HOME_WORLDS:
@@ -554,7 +553,7 @@ def _collect_visa(pages: list[PageEvidence]) -> str:
                 cands.append(_cand("visa_class", m.group(1).upper(), page, rank_boost=4))
     if cands:
         return pick_candidate(cands) or "unknown"
-    full = full_corpus(pages)
+    full = trusted_corpus(pages)
     labeled = _label("visa_class", full)
     if labeled and labeled.upper() in VISA_VALUES:
         return labeled.upper()
@@ -589,8 +588,7 @@ def _collect_sponsor(pages: list[PageEvidence]) -> str:
                 cands.append(_cand("sponsor_id", f"SPN-{m.group(1)}", page, rank_boost=boost))
     if cands:
         return pick_candidate(cands) or "SPN-0000"
-    full = full_corpus(pages)
-    # Prefer labeled then free (includes decoy-only residual path)
+    full = trusted_corpus(pages)
     labeled = _label("sponsor_id", full)
     if labeled:
         return labeled.upper()
@@ -640,8 +638,7 @@ def _collect_date(pages: list[PageEvidence]) -> str:
             ),
         )
         return cands_sorted[0].value
-    # full-text fallback (may include decoy tokens when packet is image-only)
-    full = full_corpus(pages)
+    full = trusted_corpus(pages)
     dates = DATE_RE.findall(full)
     for d in dates:
         if _plausible_date(d):
@@ -682,12 +679,12 @@ def _collect_purpose(pages: list[PageEvidence]) -> str:
     hit = pick_candidate(cands)
     if hit:
         return hit
-    # Fallback: only non-finding pages (finding notes say "Transit class..." etc.)
+    # Trusted pages except finding notes (often say "Transit class...").
     chunks = []
     for page in pages:
-        if page.page_type == "finding":
+        if page.page_type in {"finding", "decoy", "empty"}:
             continue
-        chunks.append(page.text or "")
+        chunks.append(strip_untrusted_lines(page.text) or "")
     full = "\n".join(chunks).casefold()
     for known in KNOWN_PURPOSES:
         if known in full:
@@ -723,7 +720,7 @@ def _collect_fee(pages: list[PageEvidence]) -> str:
     if cands:
         return pick_candidate(cands) or "unknown"
 
-    full = full_corpus(pages)
+    full = trusted_corpus(pages)
     m = re.search(r"\bFee Status\s*(?:\n|:)\s*(paid|waived|unpaid|unknown)\b", full, re.I)
     if m:
         return m.group(1).casefold()
@@ -731,10 +728,14 @@ def _collect_fee(pages: list[PageEvidence]) -> str:
     if m and m.group(1).upper() not in {"N/A", "NA", "NONE", "-", "NULL", "UNKNOWN"}:
         if re.search(r"WAIVER|HARDSHIP|DIP", m.group(1), re.I):
             return "waived"
-    # last resort: fee word anywhere (baseline; helps decoy-only + OCR fee pages)
-    m = re.search(r"\b(paid|waived|unpaid)\b", full, re.I)
-    if m:
-        return m.group(1).casefold()
+    # Prefer labeled fee pages only for bare paid/waived/unpaid (not decoy free text)
+    for page in pages:
+        if page.page_type not in {"fee", "form", "finding"}:
+            continue
+        ptext = strip_untrusted_lines(page.text)
+        m = re.search(r"\b(paid|waived|unpaid)\b", ptext, re.I)
+        if m:
+            return m.group(1).casefold()
     return "unknown"
 
 
@@ -767,8 +768,8 @@ def _collect_risk(pages: list[PageEvidence]) -> str:
             if re.search(r"\bACTIVE\s+WARRANT\b", ptext, re.I):
                 found.append("active_warrant")
 
-    # Full-text token scan (baseline): OCR stamps + residual decoy-only packets
-    full = full_corpus(pages)
+    # Trusted free-form scan only (OCR stamps on finding/form/registry pages).
+    full = trusted_corpus(pages)
     low = full.casefold()
     for token in RISK_FLAG_TOKENS:
         if token in low or token.replace("_", " ") in low:
@@ -779,7 +780,7 @@ def _collect_risk(pages: list[PageEvidence]) -> str:
         found.append("active_warrant")
 
     if not found:
-        return "none"
+        return "none" if not labeled_none else "none"
     return "|".join(sorted(set(found)))
 
 
@@ -790,8 +791,9 @@ def extract_fields(pdf_path: Path, text: str | None = None) -> dict:
         text = "\n".join(text_pages)
 
     pages = build_evidence_bundle(text_pages, merged_text=text)
-    # Keep full text for adjudicate Finding regex (includes OCR stamps)
-    full_text = text if text else full_corpus(pages)
+    # Full merged stream for case_id / length; trusted stream for policy.
+    full_text = text if text else trusted_corpus(pages)
+    trusted = trusted_corpus(pages)
 
     return {
         "case_id": _find_case_id(full_text, pdf_path.stem),
@@ -805,6 +807,7 @@ def extract_fields(pdf_path: Path, text: str | None = None) -> dict:
         "risk_flags": _collect_risk(pages),
         "fee_status": _collect_fee(pages),
         "_text": full_text,
-        "_text_len": len(full_text or ""),
+        "_trusted_text": trusted,
+        "_text_len": len(trusted or full_text or ""),
         "_page_types": [f"{p.source}:{p.page_type}" for p in pages],
     }
