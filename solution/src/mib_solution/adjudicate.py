@@ -1,10 +1,9 @@
 """Rule-based adjudication from FIELD_MANUAL.md policy.
 
-Priority:
-1. Visible MIB adjudicator Finding notes (trusted stamp / signed note)
-   — OCR-tolerant variants of DENIED (DEMED/DENED/Deny, Fouing/Frdirg, …)
-2. Clear disqualifiers from structured fields and secondary text phrases
-3. Light OCR risk map: garbled biohazard/embargo/warrant/tamper tokens → DENIED
+Priority (general policy — no train-mined SPN extras or OCR typo forests):
+1. Visible Finding line (strict APPROVED; clean DENIED / NEEDS_REVIEW)
+2. Clean disqualifying phrases and structured risk flags
+3. Manual-backed rules: TRANSIT-7, unpaid fee, public revoked sponsors, multi review flags
 4. Stale arrival (non-DIP-1) when arrival is >180 days before packet receipt
 5. Otherwise NEEDS_REVIEW
 
@@ -31,37 +30,31 @@ REVIEW_ONLY_FLAGS = {
     "rescinded_denial",
 }
 
-# Public manual + high-frequency revoked sponsors inferred from labeled examples
+# Public FIELD_MANUAL revoked sponsors only (no train-mined extras).
 REVOKED_SPONSORS = {
     "SPN-0007",
     "SPN-0139",
     "SPN-4040",
 }
 
-# Additional sponsors that are almost always disqualifying outside DIP-1
-EXTRA_REVOKED_SPONSORS = {
-    "SPN-9090",
-    "SPN-2718",
-    "SPN-7331",
-}
-
 # Challenge packet receipt reference (dataset cut / public data version date).
 PACKET_RECEIPT_DATE = date(2026, 7, 7)
 STALE_DAYS = 180
 
-# OCR-tolerant Finding line. Stamp OCR often drops the colon or mangles the
-# keyword (Finding→Fouing/Frdirg/Finis) and DENIED→DEMED/DENED/Deny.
+# Finding stamp: exact label, or one common OCR miss (drop of i or g).
+# Optional separator (Finding:DENIED / Finding DENIED / FindingDENIED).
+# DENED accepted only on a Finding-labeled line (DENIED with missing I) — not free text.
+FINDING_LABEL = r"(?:Finding|Findng|Findin)"
+FINDING_DECISION = r"(APPROVED|DENIED|NEEDS_REVIEW|DENED)"
+
 FINDING_RE = re.compile(
-    r"(?:Finding|Findigg|Fouing|Fearg|Pearg|Frdirg|Feging|Findey|Findng|"
-    r"Finis|Finsiege|F[il1]nd[il1]?[nhg]g?)"
-    r"\s*[:.\-]?\s*"
-    r"(APPROVED|DENIED|NEEDS_REVIEW|DENED|DEMED|DENIER|DENY)\b",
+    rf"{FINDING_LABEL}\s*[:.\-]?\s*{FINDING_DECISION}\b",
     re.IGNORECASE,
 )
 
-# Strict Finding APPROVED only (never promote OCR garbage to APPROVED)
+# APPROVED stays strict on the decision token (never APPROV / APP ROVED).
 FINDING_APPROVED_STRICT_RE = re.compile(
-    r"Finding:\s*APPROVED\b",
+    rf"{FINDING_LABEL}\s*[:.\-]?\s*APPROVED\b",
     re.IGNORECASE,
 )
 
@@ -70,7 +63,7 @@ MANUAL_SPONSOR_RE = re.compile(
     re.IGNORECASE,
 )
 
-# Clean text-layer secondary DQ phrases
+# Clean text-layer / OCR secondary DQ phrases (readable English, not garble maps).
 EMBARGO_TEXT_RE = re.compile(
     r"\bEMBARGO\s+REVIEW\b|\bplanetary\s+embargo\b|\bplanetary_embargo\b",
     re.IGNORECASE,
@@ -88,88 +81,16 @@ MEMORY_TEXT_RE = re.compile(
     re.IGNORECASE,
 )
 
-# Adjudicator note reasons that are always NEEDS_REVIEW on train (text layer)
+# Explicit damaged-evidence reason → review (not deny via conflicting fee OCR).
 DAMAGED_PACKET_RE = re.compile(
-    r"Packet contains damaged or contradictory|"
-    r"damaged or contradictory visible evidence",
+    r"damaged or contradictory visible evidence|"
+    r"Packet contains damaged or contradictory",
     re.IGNORECASE,
 )
 
-# ---------------------------------------------------------------------------
-# Light OCR risk map — garbled stamp / note tokens → DQ flag tokens
-# Precision validated on train text layer (P(DENIED|hit) ≥ 0.97 for each).
-# ---------------------------------------------------------------------------
-OCR_RISK_PATTERNS: list[tuple[re.Pattern[str], str]] = [
-    # planetary_embargo: planetery_embargo / plonetary embgmn / ctonetary embamen
-    (
-        re.compile(
-            r"p[l1i][ao0]n[e3a]?t[e3a]?r[yi]?[\s_\-.]{0,3}emb[ao0er]{2,}",
-            re.IGNORECASE,
-        ),
-        "planetary_embargo",
-    ),
-    # Heavy OCR garble: ntonetary enkgenn / oonetay enbgens / clensjery_emigenn
-    (
-        re.compile(
-            r"\b[a-z]{0,4}n[toea]{1,4}t[aeor]{1,3}[yi]?[\s_\.]+"
-            r"(?:emb|enb|enk|emig)[a-z]{0,8}\b",
-            re.IGNORECASE,
-        ),
-        "planetary_embargo",
-    ),
-    (
-        re.compile(
-            r"[cp]l[aeo]n[a-z]{2,8}[\s_.]*(?:emb|emi|enb)",
-            re.IGNORECASE,
-        ),
-        "planetary_embargo",
-    ),
-    # "risk fap/flap/sep: … emb*" adjudicator reason lines (OCR-tolerant)
-    (
-        re.compile(
-            r"(?:risk|rick|isk|nek|deck)\s+"
-            r"(?:flag|fap|flap|fing|fieg|fleg|fag|sep)[a-z]{0,4}"
-            r"[\s:.\-]+[A-Za-z_\s]{0,24}"
-            r"(?:emb|enb[g]?|enk[g]?|emig|ember|emiy)",
-            re.IGNORECASE,
-        ),
-        "planetary_embargo",
-    ),
-    # "Embargo home world" registry line (and OCR "Embargo home word")
-    (
-        re.compile(r"\bEmbargo\s+home\s+wor", re.IGNORECASE),
-        "planetary_embargo",
-    ),
-    (
-        re.compile(r"\bEMBARGO\s+REVIEW\b", re.IGNORECASE),
-        "planetary_embargo",
-    ),
-    # biohazard / bio hazard / biohazard_red
-    (
-        re.compile(
-            r"\bb[il1]o[\s_\-.]{0,2}h[ae]z(?:ard)?(?:[\s_\-]*red)?\b|\bbiohazard_red\b",
-            re.IGNORECASE,
-        ),
-        "biohazard_red",
-    ),
-    # active warrant
-    (
-        re.compile(r"\bact[il1]?ve?[\s_\-]*warr", re.IGNORECASE),
-        "active_warrant",
-    ),
-    # memory tampering
-    (
-        re.compile(r"\bmem[oa]r[yi]?[\s_\-]*tamp", re.IGNORECASE),
-        "memory_tampering",
-    ),
-]
-
-# "Disqualifying risk flag: <token>" on Manual Adjudicator Notes (OCR-tolerant)
+# Clean "Disqualifying risk flag: <token>" lines only.
 DISQUAL_RISK_LINE_RE = re.compile(
-    r"(?:Disqual|Djscu|Djsou|Disquail|Disqually|Dpecug|Dpems|Djesu)[a-z]{0,14}\s+"
-    r"(?:risk|rick|isk|nek|deck)\s+"
-    r"(?:flag|fap|flap|fing|fieg|fleg|fag|sep)[a-z]{0,4}\s*[:.]\s*"
-    r"([A-Za-z_\s\.]{3,48})",
+    r"Disqualifying\s+risk\s+flag\s*:\s*([A-Za-z_\s]{3,48})",
     re.IGNORECASE,
 )
 
@@ -206,90 +127,71 @@ def _is_stale_non_dip(arrival: date | None, visa: str) -> bool:
     return age > STALE_DAYS
 
 
-def _multi_field_clean(fields: dict, visa: str, sponsor: str, text_len: int) -> bool:
-    """Require several independent trusted fields before extra-revoke path."""
-    if text_len < 400:
-        return False
-    if visa not in {"XW-1", "XW-2", "DIP-1", "MED-3"}:
-        return False
-    if sponsor in {"", "SPN-0000"}:
-        return False
-    if not _present(fields.get("applicant_name")):
-        return False
-    if not _present(fields.get("species_code")):
-        return False
-    if not _present(fields.get("home_world")):
-        return False
-    if not _present(fields.get("declared_purpose")):
-        return False
-    arrival = (fields.get("arrival_date") or "").strip()
-    if not arrival or arrival == "1900-01-01":
-        return False
-    return True
-
-
 def _normalize_finding_decision(raw: str) -> str | None:
-    """Map OCR Finding tokens to adjudication classes. APPROVED stays strict."""
     d = (raw or "").strip().upper()
-    if d in {"DENIED", "DENED", "DEMED", "DENIER", "DENY"}:
+    if d in {"DENIED", "DENED"}:
         return "DENIED"
     if d == "NEEDS_REVIEW":
         return "NEEDS_REVIEW"
     if d == "APPROVED":
-        # Only accept APPROVED when the strict "Finding: APPROVED" form also hits
-        # (caller double-checks); bare OCR APPROVED is too easy to hallucinate.
         return "APPROVED"
     return None
 
 
-def ocr_risk_flags(text: str) -> set[str]:
-    """Light OCR risk map: scan full text (incl. OCR_FALLBACK) for DQ tokens.
-
-    Returns structured disqualifying flag names. Safe to call on text-layer-only
-    packets — patterns also match clean tokens.
-    """
+def clean_risk_flags_from_text(text: str) -> set[str]:
+    """Map clean DQ language in text to structured flag tokens (no garble bank)."""
     if not text:
         return set()
     found: set[str] = set()
-    for pat, token in OCR_RISK_PATTERNS:
-        if pat.search(text):
-            found.add(token)
-
+    if EMBARGO_TEXT_RE.search(text):
+        found.add("planetary_embargo")
+    if BIOHAZARD_TEXT_RE.search(text):
+        found.add("biohazard_red")
+    if WARRANT_TEXT_RE.search(text):
+        found.add("active_warrant")
+    if MEMORY_TEXT_RE.search(text):
+        found.add("memory_tampering")
     for m in DISQUAL_RISK_LINE_RE.finditer(text):
-        blob = m.group(1).casefold()
-        for pat, token in OCR_RISK_PATTERNS:
-            if pat.search(blob):
+        blob = m.group(1).casefold().replace(" ", "_")
+        for token in DISQUALIFYING_FLAGS | REVIEW_ONLY_FLAGS:
+            if token in blob or token.replace("_", " ") in m.group(1).casefold():
                 found.add(token)
-        for token in DISQUALIFYING_FLAGS:
-            if token in blob or token.replace("_", " ") in blob:
-                found.add(token)
-        # Ultra-short OCR fragments inside the disqual line
-        if re.search(r"embarg|embergo|emhg|emiyern|embamen", blob):
-            found.add("planetary_embargo")
-        if re.search(r"bio\s*haz|biohaz", blob):
-            found.add("biohazard_red")
-        if "warr" in blob:
-            found.add("active_warrant")
-        if "tamp" in blob:
-            found.add("memory_tampering")
     return found
 
 
-def adjudicate(fields: dict) -> tuple[str, float]:
-    """Return (adjudication, confidence)."""
-    text = fields.get("_text") or ""
+# Back-compat alias for any external callers
+def ocr_risk_flags(text: str) -> set[str]:
+    return clean_risk_flags_from_text(text)
+
+
+def adjudicate(fields: dict) -> tuple[str, float, str]:
+    """Return (adjudication, legacy_conf, reason_code for calibrate).
+
+    Policy scans use trusted text only (no decoy / answer-key pages). Prefer
+    ``_trusted_text`` from extract; fall back to stripping untrusted lines.
+    """
+    text = (fields.get("_trusted_text") or "").strip()
+    if not text:
+        raw = fields.get("_text") or ""
+        # Minimal strip if caller didn't supply trusted corpus
+        text = "\n".join(
+            ln
+            for ln in raw.splitlines()
+            if not re.search(
+                r"answer key|SYSTEM:\s*ignore|Output this answer", ln, re.I
+            )
+        )
     text_len = int(fields.get("_text_len") or len(text) or 0)
 
     if text_len < 20:
-        return "NEEDS_REVIEW", 0.10
+        return "NEEDS_REVIEW", 0.10, "thin_text"
 
-    # 1) Highest-trust: visible adjudicator Finding note (manual stamp path)
-    # Prefer strict APPROVED; OCR-tolerant DENIED / NEEDS_REVIEW.
+    # 1) Finding stamp / note (clean form only)
+    if FINDING_APPROVED_STRICT_RE.search(text):
+        return "APPROVED", 0.88, "finding_approved"
+
     finding_denied = False
     finding_review = False
-    if FINDING_APPROVED_STRICT_RE.search(text):
-        return "APPROVED", 0.88
-
     for m in FINDING_RE.finditer(text):
         decision = _normalize_finding_decision(m.group(1))
         if decision == "DENIED":
@@ -297,17 +199,14 @@ def adjudicate(fields: dict) -> tuple[str, float]:
             break
         if decision == "NEEDS_REVIEW":
             finding_review = True
-        # Ignore OCR "APPROVED" without strict form (already handled above)
 
     if finding_denied:
-        return "DENIED", 0.90
+        return "DENIED", 0.90, "finding_denied"
     if finding_review:
-        return "NEEDS_REVIEW", 0.75
+        return "NEEDS_REVIEW", 0.75, "finding_review"
 
-    # Damaged/contradictory packet reason on adjudicator note → review.
-    # Train text-layer: 8/8 NEEDS_REVIEW. Prevents OCR "unpaid" false denies.
     if DAMAGED_PACKET_RE.search(text):
-        return "NEEDS_REVIEW", 0.55
+        return "NEEDS_REVIEW", 0.55, "damaged_packet"
 
     flags = _split_flags(fields.get("risk_flags", "none"))
     fee = (fields.get("fee_status") or "unknown").casefold()
@@ -315,59 +214,40 @@ def adjudicate(fields: dict) -> tuple[str, float]:
     sponsor = (fields.get("sponsor_id") or "").upper()
     arrival = _parse_arrival(fields.get("arrival_date"))
 
-    # Manual correction notes override the intake sponsor field
     manual_sponsor = MANUAL_SPONSOR_RE.search(text)
     if manual_sponsor:
         sponsor = manual_sponsor.group(1).upper()
 
-    # 2) Secondary trusted phrases in visible text (registry / risk language)
+    # 2) Clean DQ phrases → deny
     if EMBARGO_TEXT_RE.search(text):
-        return "DENIED", 0.78
+        return "DENIED", 0.78, "text_dq"
     if BIOHAZARD_TEXT_RE.search(text):
-        return "DENIED", 0.78
+        return "DENIED", 0.78, "text_dq"
     if WARRANT_TEXT_RE.search(text):
-        return "DENIED", 0.78
+        return "DENIED", 0.78, "text_dq"
     if MEMORY_TEXT_RE.search(text):
-        return "DENIED", 0.78
+        return "DENIED", 0.78, "text_dq"
 
-    # 3) Light OCR risk map (garbled stamp tokens)
-    ocr_flags = ocr_risk_flags(text)
-    if ocr_flags & DISQUALIFYING_FLAGS:
-        return "DENIED", 0.76
-    flags = flags | ocr_flags
-
-    # 4) Structured disqualifiers
+    # 3) Structured + clean-text risk flags
+    flags = flags | clean_risk_flags_from_text(text)
     if flags & DISQUALIFYING_FLAGS:
-        return "DENIED", 0.70
+        return "DENIED", 0.70, "flags_dq"
+
+    # 4) Manual-backed structured rules
     if visa == "TRANSIT-7":
-        return "DENIED", 0.68
-    # Unpaid fee always denies (including DIP-1) in labeled policy —
-    # but skip when OCR fee contradicts a visible waiver token (waived↔unpaid).
+        return "DENIED", 0.68, "transit7"
     if fee == "unpaid":
         if re.search(r"\b(?:waived|DIP-WAIVER|hardship\s+waiver)\b", text, re.I):
-            # Contradictory fee signals → review, not deny
-            pass
+            pass  # contradictory → fall through to review
         else:
-            return "DENIED", 0.72
+            return "DENIED", 0.72, "unpaid"
     if sponsor in REVOKED_SPONSORS and visa != "DIP-1":
-        return "DENIED", 0.62
-    # Multiple review-only flags can combine into denial (FIELD_MANUAL edge case)
+        return "DENIED", 0.62, "revoked_sponsor"
     if len(flags & REVIEW_ONLY_FLAGS) >= 2:
-        return "DENIED", 0.60
+        return "DENIED", 0.60, "multi_review"
 
-    multi_clean = _multi_field_clean(fields, visa, sponsor, text_len)
-
-    # Extra revoked sponsors only when the packet is well-formed (reduces ID mixups)
-    if (
-        multi_clean
-        and sponsor in EXTRA_REVOKED_SPONSORS
-        and visa != "DIP-1"
-    ):
-        return "DENIED", 0.58
-
-    # 5) Stale arrival for non-DIP work visas (FIELD_MANUAL date rule)
+    # 5) Stale arrival (FIELD_MANUAL date rule)
     if _is_stale_non_dip(arrival, visa):
-        return "DENIED", 0.66
+        return "DENIED", 0.66, "stale_arrival"
 
-    # No multi-field auto-APPROVED: image-only DQ stamps cause catastrophic FPs.
-    return "NEEDS_REVIEW", 0.35
+    return "NEEDS_REVIEW", 0.35, "default_review"

@@ -30,3 +30,13 @@ worktrees/*/README.md
 # Ephemeral run logs / failed farm noise
 artifacts/*_run.log
 artifacts/ship_*/
+
+# Local explore / worktrees (do not re-commit)
+worktrees/
+artifacts/ocr-bench-*/
+artifacts/rec-*/
+artifacts/lat-*/
+artifacts/vlm_*/
+artifacts/paddle-ft*/
+artifacts/exp-*/
+*.pdopt

@@ -1,0 +1,14 @@
+{
+  "n": 40,
+  "wall_s": 188,
+  "s_per_pdf": 4.7,
+  "pass": true,
+  "workers": 2,
+  "clahe": 0,
+  "cpus": 4,
+  "memory": "8g",
+  "image": "mib-submission:paddle-ft",
+  "set": "prior_lat40_ids_copied",
+  "note": "Finding recover image; real PDF copies. Residual-hard first40 was ~6.25s (OCR denser).",
+  "prior_recorded_s_per_pdf": 5.71
+}

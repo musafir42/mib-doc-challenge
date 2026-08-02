@@ -1,3 +1,0 @@
-case_id,applicant_name,species_code,home_world,visa_class,sponsor_id,arrival_date,declared_purpose,risk_flags,fee_status,adjudication
-MIB-999999,Zed Zarnax,ORION_GRAYS,Kepler-186f,XW-2,SPN-1042,2026-04-17,research,none,paid,APPROVED
-MIB-999998,Luma Voss,TRIANGULAN,Gliese-581g,DIP-1,SPN-2201,2026-05-03,diplomatic,identity_conflict|sponsor_mismatch,waived,NEEDS_REVIEW

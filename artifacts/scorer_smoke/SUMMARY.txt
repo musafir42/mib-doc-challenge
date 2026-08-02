@@ -1,3 +1,0 @@
-perfect_total=147.66
-partial_total=114.24422222222222
-catastrophic_type=catastrophic_false_approval (from scorer)

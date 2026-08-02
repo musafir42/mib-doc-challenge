@@ -1,51 +1,36 @@
-# MIB solution
+# MIB solution — Paddle FT ship
 
-Offline PDF intake pipeline for the MIB Doc Challenge.
+Offline PDF intake for the MIB Doc Challenge. **Submit path = PaddleOCR FT.**
 
-**Current measured (official scorer):** residual ~**108.78** / train ~**119.27** /150, cat **0**  
-(`artifacts/promote_integrate/`, `artifacts/promote_integrate_full/`).  
-See repo `GROK_BUILD.md` and `artifacts/HANDOFF.md` for handoff to a high-CPU machine.
+| Gate | Score |
+|------|------:|
+| Residual n=100 (clean policy) | **107.21**+ /150 cat 0 — see `docs/APPROACH.md` |
+| Full train n=1000 | re-score after trusted-text fix — see `artifacts/ship/` |
+| Docker lat40 (4c/8g, W=2) | **~5.71 s/PDF** (≤6) |
 
-## Local run
+## Docs (repo knowledge)
 
-```bash
-uv sync
-# directory of PDFs → predictions.jsonl
-uv run mib-solution ../data/train ../artifacts/local_train/predictions.jsonl
-```
+| Doc | Contents |
+|-----|----------|
+| [`docs/APPROACH.md`](../docs/APPROACH.md) | Current ship approach, constraints, architecture, scores, run |
+| [`docs/LESSONS.md`](../docs/LESSONS.md) | Campaign knowledge for future paddle improvements |
 
-Residual A/B (preferred before any full-train claim):
+Challenge contracts: root `EVALUATION.md`, `DOCKER_SUBMISSION.md`.
 
-```bash
-# from repo root
-export MIB_WORKERS=$(nproc 2>/dev/null || echo 8)
-# see experiments/RESIDUAL.md
-```
-
-## Docker (submission path)
+## Docker
 
 ```bash
-docker build -t mib-submission .
-docker run --rm --network none \
-  --read-only --tmpfs /tmp:rw,nosuid,nodev,size=4g \
-  --mount type=bind,src=/path/to/pdfs,dst=/input,readonly \
-  --mount type=bind,src=/path/to/out,dst=/output \
-  mib-submission /input /output/predictions.jsonl
+docker build -t mib-submission:paddle-ft .
+docker run --rm --network none --cpus 4 --memory 8g --pids-limit 512 \
+  --read-only --tmpfs /tmp:rw,nosuid,nodev,size=2g \
+  -v /path/to/pdfs:/input:ro -v /path/to/out:/output \
+  mib-submission:paddle-ft /input /output/predictions.jsonl
 ```
 
-`run.sh` forces temp/cache into `/tmp` so OCR works under challenge read-only root FS.
+Defaults: `MIB_WORKERS=2`, `MIB_OCR_CLAHE=0`, models at `/app/models/paddle`.
 
-## Modules
+## Layout
 
-| File | Role |
-|------|------|
-| `pipeline.py` | end-to-end predict |
-| `ocr.py` | tesseract/poppler |
-| `extract.py` | fields |
-| `evidence.py` | page/precedence helpers |
-| `adjudicate.py` | APPROVED / DENIED / NEEDS_REVIEW |
-| `calibrate.py` | confidence only |
-
-## Modal
-
-Optional/legacy only (`modal_app.py`). Default compute is local multi-process or Docker on a high-CPU box.
+- `src/mib_solution/` — pipeline (OCR default: `ocr_paddle.py`)
+- `models/paddle/{rec,det,cls}/` — offline weights (~14 MiB)
+- `Dockerfile`, `run.sh` — submission entrypoint

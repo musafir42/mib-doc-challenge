@@ -5,9 +5,14 @@ description = "MIB Doc Challenge offline intake pipeline"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
+    "numpy>=1.26.0",
+    "opencv-python-headless>=4.8.0",
+    "paddleocr==2.10.0",
+    "paddlepaddle==3.0.0",
     "pdf2image>=1.17.0",
     "pillow>=12.3.0",
     "pypdf>=5.0.0",
+    # optional A/B only — ship default is paddle
     "pytesseract>=0.3.13",
 ]
 
@@ -18,7 +23,3 @@ mib-solution = "mib_solution.cli:main"
 requires = ["uv_build>=0.11.21,<0.12.0"]
 build-backend = "uv_build"
 
-[dependency-groups]
-dev = [
-    "modal>=1.0.0",
-]
