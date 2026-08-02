@@ -92,15 +92,15 @@ After the overfit critique (`artifacts/ship/OVERFIT_CRITIQUE.md`), product polic
 
 ## 9. Suggested future work (ordered)
 
-1. **Val 5k** under Docker 4c/8g (true ship-align).  
-2. **Full train re-score** after anti-overfit cleanup alone (`artifacts/ship/anti_overfit/`); Docker confirm. Trusted-text full train done: **114.01**.  
-3. **Synth + RecAug retrain** on clean labels (no residual leak); re-score residual + train + lat40.  
+1. Docker lat40 reconfirm after Finding flex (current ship).  
+2. **Val 5k** under Docker 4c/8g when package available.  
+3. **Synth + RecAug retrain** only with GPU or explicit overnight OK — inventory at `artifacts/ship/rec_ft/INVENTORY_AND_PLAN.md`. Do **not** default to ~1 day CPU train.  
 4. Optional: hybrid full-page paddle + fewer regions if lat headroom tightens.  
 5. Do **not** re-open VLM bakeoffs or re-add typo/SPN forests without val evidence.
 
 ---
 
-## 9. Scoreboard memory (high-water marks)
+## 10. Scoreboard memory (high-water marks)
 
 | Name | Stage | Score |
 |------|-------|------:|
@@ -109,8 +109,8 @@ After the overfit critique (`artifacts/ship/OVERFIT_CRITIQUE.md`), product polic
 | ship_train_docker lean tess | train | 116.07 |
 | promote_p1 residual / full | residual / train | 108.44 / **118.77** |
 | paddle FT ship (pre-cleanup) residual / full | residual / train | 108.77 / **118.91** |
-| paddle FT anti-overfit residual | residual | **107.21** |
-| paddle FT anti-overfit full train | train | see `artifacts/ship/anti_overfit/` when ready |
-| **paddle FT + trusted text residual / full** | residual / train | **104.22 / 114.01** |
+| paddle FT anti-overfit residual | residual | 107.21 |
+| paddle FT + trusted text residual / full | residual / train | 104.22 / 114.01 |
+| **paddle FT + finding_recover residual / full** | residual / train | **106.26 / 114.80** |
 
-Use these as regression baselines when changing the ship path. Prefer **trusted-text full train 114.01** / residual **104.22** (cat 0) over re-adding typo/SPN or decoy-page reads for proxy points.
+Use these as regression baselines when changing the ship path. Prefer **finding_recover 114.80 / 106.26** (cat 0) over re-adding typo/SPN or decoy-page reads for proxy points.

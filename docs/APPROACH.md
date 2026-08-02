@@ -10,19 +10,20 @@
 
 | Gate | Result |
 |------|--------|
-| Residual (anti-overfit + trusted text) | **104.22** /150 · cat **0** |
+| **Residual (current ship: finding_recover)** | **106.26** /150 · cat **0** |
+| **Full train (current ship: finding_recover)** | **114.80** /150 · cat **0** |
+| Residual (anti-overfit + trusted text) | 104.22 /150 · cat 0 |
 | Residual (anti-overfit only) | 107.21 /150 · cat 0 |
 | Residual (prior brittle policy, reference) | 108.77 /150 · cat 0 |
-| Full train (anti-overfit + trusted text) | **114.01** /150 · cat **0** |
-| Full train (prior brittle policy, reference) | **118.91** /150 · cat **0** |
-| Full train (anti-overfit clean) | *re-score in progress* → `artifacts/ship/anti_overfit/` |
-| Docker latency (lat40 @2w, CLAHE=0, 4c/8g) | **~5.71 s/PDF** · **PASS** (≤6 s) |
+| Full train (anti-overfit + trusted text) | 114.01 /150 · cat 0 |
+| Full train (prior brittle policy, reference) | **118.91** /150 · cat 0 |
+| Docker latency (lat40 @2w, CLAHE=0, 4c/8g) | **~4.70 s/PDF** · **PASS** (≤6 s; prior lat40 IDs, real copies) |
 | Image | `mib-submission:paddle-ft` · **~0.60 GiB** (≤4 GiB) |
-| Models | ~**14 MiB** under `solution/models/paddle/` |
+| Models | ~**14 MiB** under `solution/models/paddle/` · rec = **best_ep5** |
 
 **Comparators:** tesseract P1 full train **118.77** · lean docker tess **116.07** · historical integrate **119.27**.
 
-Policy was cleaned for generalization (see `docs/LESSONS.md` and `artifacts/ship/OVERFIT_CRITIQUE.md`): drop train-mined EXTRA SPNs, OCR garble risk maps, and Finding typo banks. Residual dropped **−1.56** (mostly class) with **cat still 0** — intentional trade for maintainability.
+Policy is cleaned for generalization (see `docs/LESSONS.md`): no train-mined EXTRA SPNs, no OCR garble risk maps, no Finding typo forests. Structural Finding flex only (`Findng`/`Findin` + optional separator + `DENED` on labeled lines). Metrics: `artifacts/ship/finding_recover/`.
 
 ---
 
@@ -108,13 +109,17 @@ Evidence snapshots (metrics only): `artifacts/ship/{residual_eval,train_eval,tra
 
 ## 6. Score breakdown
 
-**Residual prior brittle (CLAHE=0):** extract 35.20 · class 58.30 · calib 15.27 · total **108.77** · cat 0  
+**Residual current (finding_recover):** extract 33.83 · class **55.90** · calib 16.53 · total **106.26** · cat 0  
 
-**Residual anti-overfit + trusted text:** extract 33.83 · class 54.10 · calib 16.28 · total **104.22** · cat 0  
+**Full train current (finding_recover):** extract 40.77 · class **58.45** · calib 15.58 · total **114.80** · cat 0  
 
-**Full train prior brittle:** extract 43.48 · class 60.74 · calib 14.68 · total **118.91** · cat 0 · wall ~4.06 s/PDF @ W=2  
+**Residual anti-overfit + trusted text:** extract 33.83 · class 54.10 · calib 16.28 · total 104.22 · cat 0  
 
-**Full train anti-overfit + trusted text:** extract 40.77 · class 57.85 · calib 15.40 · total **114.01** · cat 0 · wall ~4.17 s/PDF @ W=2  
+**Residual prior brittle (CLAHE=0):** extract 35.20 · class 58.30 · calib 15.27 · total 108.77 · cat 0  
+
+**Full train anti-overfit + trusted text:** extract 40.77 · class 57.85 · calib 15.40 · total 114.01 · cat 0  
+
+**Full train prior brittle:** extract 43.48 · class 60.74 · calib 14.68 · total 118.91 · cat 0  
 
 ---
 
@@ -149,10 +154,11 @@ Optional A/B: `MIB_OCR_ENGINE=tesseract` (legacy path only).
 
 - Private validation 5k package (not scored here)
 - Docker full-train n=1000 confirm (host full train + Docker lat40 stand in)
-- Unfinished synth RecAug retrain; **ship weights = best_ep5**
+- Synth RecAug retrain unfinished / data pruned; **ship weights = best_ep5** (no day-scale CPU retrain in flight)
+- Rec FT inventory + deferred plan: `artifacts/ship/rec_ft/INVENTORY_AND_PLAN.md`
 
 ---
 
 ## 9. Future improvements (use LESSONS.md)
 
-Read **`docs/LESSONS.md`** before changing gates, OCR density, or adjudicate rules. Measure residual + full train + Docker lat40 under 4c/8g every time.
+Read **`docs/LESSONS.md`** before changing gates, OCR density, or adjudicate rules. Measure residual + full train + Docker lat40 under 4c/8g every time. Prefer perception (rec) over policy forests; do not start day-scale CPU retrain without GPU or explicit overnight OK.
