@@ -62,7 +62,9 @@ PAGE_CLASSIFIERS: list[tuple[str, re.Pattern[str]]] = [
     (
         "finding",
         re.compile(
-            r"Manual Adjudicator Note|Finding:\s*(?:APPROVED|DENIED|NEEDS_REVIEW)\b",
+            r"Manual Adjudicator Note|"
+            r"(?:Finding|Findng|Findin)\s*[:.\-]?\s*"
+            r"(?:APPROVED|DENIED|NEEDS_REVIEW|DENED)\b",
             re.I,
         ),
     ),

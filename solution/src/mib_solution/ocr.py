@@ -492,9 +492,10 @@ _APPLICANT_LABEL_RE = re.compile(
     r"(?:Applicant(?:\s+Name)?|Registry Name|Full Name)\s*(?:\n|:)\s*[A-Za-z]",
     re.IGNORECASE,
 )
-# Clean Finding line only — match adjudicate (no OCR typo banks).
+# Align with adjudicate Finding stamp (optional separator; Findng/Findin; DENED).
 _FINDING_RE = re.compile(
-    r"Finding\s*:\s*(APPROVED|DENIED|NEEDS_REVIEW)\b",
+    r"(?:Finding|Findng|Findin)\s*[:.\-]?\s*"
+    r"(?:APPROVED|DENIED|NEEDS_REVIEW|DENED)\b",
     re.IGNORECASE,
 )
 _DQ_RE = re.compile(

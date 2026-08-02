@@ -41,14 +41,20 @@ REVOKED_SPONSORS = {
 PACKET_RECEIPT_DATE = date(2026, 7, 7)
 STALE_DAYS = 180
 
-# Clean Finding line — no OCR typo banks (Fouing/DEMED/…). Rely on FT rec + geometry.
+# Finding stamp: exact label, or one common OCR miss (drop of i or g).
+# Optional separator (Finding:DENIED / Finding DENIED / FindingDENIED).
+# DENED accepted only on a Finding-labeled line (DENIED with missing I) — not free text.
+FINDING_LABEL = r"(?:Finding|Findng|Findin)"
+FINDING_DECISION = r"(APPROVED|DENIED|NEEDS_REVIEW|DENED)"
+
 FINDING_RE = re.compile(
-    r"Finding\s*:\s*(APPROVED|DENIED|NEEDS_REVIEW)\b",
+    rf"{FINDING_LABEL}\s*[:.\-]?\s*{FINDING_DECISION}\b",
     re.IGNORECASE,
 )
 
+# APPROVED stays strict on the decision token (never APPROV / APP ROVED).
 FINDING_APPROVED_STRICT_RE = re.compile(
-    r"Finding:\s*APPROVED\b",
+    rf"{FINDING_LABEL}\s*[:.\-]?\s*APPROVED\b",
     re.IGNORECASE,
 )
 
@@ -123,7 +129,7 @@ def _is_stale_non_dip(arrival: date | None, visa: str) -> bool:
 
 def _normalize_finding_decision(raw: str) -> str | None:
     d = (raw or "").strip().upper()
-    if d == "DENIED":
+    if d in {"DENIED", "DENED"}:
         return "DENIED"
     if d == "NEEDS_REVIEW":
         return "NEEDS_REVIEW"
